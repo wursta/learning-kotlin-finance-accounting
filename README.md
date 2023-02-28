@@ -1,1 +1,6 @@
-# learning-kotlin-finance-accounting
+# Учебный проект по Kotlin
+
+## Модули
+
+| m1l1-helloworld | Выводит площадь круга по введённому пользователем радиусу |
+|---|---|
