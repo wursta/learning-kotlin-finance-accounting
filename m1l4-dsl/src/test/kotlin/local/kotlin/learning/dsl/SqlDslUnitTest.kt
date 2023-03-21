@@ -9,7 +9,7 @@ import kotlin.test.assertFailsWith
 // Реализуйте dsl для составления sql запроса, чтобы все тесты стали зелеными.
 class SqlDslUnitTest {
     private fun checkSQL(expected: String, sql: SqlSelectBuilder) {
-        assertEquals(expected, sql.build())
+        assertEquals(expected, sql.build().toString())
     }
 
     @Test

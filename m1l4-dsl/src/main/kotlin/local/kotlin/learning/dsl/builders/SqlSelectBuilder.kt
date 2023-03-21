@@ -41,7 +41,7 @@ class SqlSelectBuilder {
         conditions.add(0, SqlWhereBuilder(ConditionsLogic.OR).apply(block))
     }
 
-    fun build(): String {
+    fun build(): Select {
         if (tableName.isEmpty()) {
             throw Exception("Не установлена таблица")
         }
@@ -51,16 +51,15 @@ class SqlSelectBuilder {
          * Нужно подумать, как сделать, чтобы функция where не добавляла сразу объект в conditions.
          * Тогда можно будет написать так: conditions.joinToString(separator = " and ") { it.build() }.
          */
-        val whereParts = mutableListOf<String>()
+        val whereBlocks = mutableListOf<Where>()
         for (c in conditions) {
             if (c.hasConditions()) {
-                whereParts.add(c.build())
+                whereBlocks.add(c.build())
             }
         }
-        val whereStr = whereParts.joinToString(separator = " and ")
 
         return Select(
-            tableName, columns, whereStr
-        ).toString()
+            tableName, columns, whereBlocks
+        )
     }
 }

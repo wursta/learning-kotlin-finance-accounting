@@ -3,10 +3,10 @@ package local.kotlin.learning.dsl.models
 data class Select(
     val from: String,
     val columns: List<Column>,
-    val where: String
+    val whereBlocks: List<Where>
 ) {
     override fun toString(): String {
-        var columnsStr = "*";
+        var columnsStr = "*"
 
         if (!columns.isEmpty()) {
             columnsStr = columns.joinToString(", ") { it.toString() }
@@ -14,8 +14,9 @@ data class Select(
 
         var sql = "select $columnsStr from $from"
 
-        if (!where.isEmpty()) {
-            sql += " where $where"
+
+        if (!whereBlocks.isEmpty()) {
+            sql += " where " + whereBlocks.joinToString(separator = " and ") { it.toString() }
         }
 
         return sql

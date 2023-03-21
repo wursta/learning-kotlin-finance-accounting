@@ -35,10 +35,10 @@ class SqlWhereBuilder(val logic: ConditionsLogic = ConditionsLogic.AND) {
     infix fun String.nonEq(value: Number) {
         conditions.add(Condition(this, Operator.NON_EQ, value.toString()))
     }
-    fun build(): String {
+    fun build(): Where {
         return Where(
             logic,
             conditions
-        ).toString()
+        )
     }
 }
