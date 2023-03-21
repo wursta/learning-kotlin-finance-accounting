@@ -8,15 +8,13 @@ import local.kotlin.learning.dsl.models.Where
 @DslMarker
 annotation class QueryWhereDsl
 @QueryWhereDsl
-class SqlWhereBuilder {
-    private var logic: ConditionsLogic = ConditionsLogic.AND
+class SqlWhereBuilder(val logic: ConditionsLogic = ConditionsLogic.AND) {
     private var conditions: MutableList<Condition> = mutableListOf()
-    fun setLogic(logic: ConditionsLogic): SqlWhereBuilder {
-        this.logic = logic
-        return this
-    }
+
+    fun hasConditions(): Boolean = conditions.isNotEmpty()
+
     infix fun String.eq(value: String?) {
-        var v = value;
+        var v = value
         if (v !== null) {
             v = "'$value'"
         }
@@ -27,7 +25,7 @@ class SqlWhereBuilder {
     }
 
     infix fun String.nonEq(value: String?) {
-        var v = value;
+        var v = value
         if (v !== null) {
             v = "'$value'"
         }

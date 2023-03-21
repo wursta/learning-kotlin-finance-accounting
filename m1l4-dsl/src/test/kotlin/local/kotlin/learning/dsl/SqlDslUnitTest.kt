@@ -110,4 +110,23 @@ class SqlDslUnitTest {
 
         checkSQL(expected, real)
     }
+
+    @Test
+    fun `when 'and' and 'or' conditions are specified`() {
+        val expected = "select col_a, col_b from table where col_a = 'test' and (col_b is null or col_b = 5)"
+
+        val real = query {
+            select("col_a", "col_b")
+            from("table")
+            where {
+                "col_a" eq "test"
+                or {
+                    "col_b" eq null
+                    "col_b" eq 5
+                }
+            }
+        }
+
+        checkSQL(expected, real)
+    }
 }

@@ -18,7 +18,7 @@ fun query(block: SqlSelectBuilder.() -> Unit) = SqlSelectBuilder().apply(block)
 class SqlSelectBuilder {
     private var tableName: String = ""
     private var columns: MutableList<Column> = mutableListOf()
-    private var where: SqlWhereBuilder = SqlWhereBuilder()
+    private var conditions: MutableList<SqlWhereBuilder> = mutableListOf()
 
     @QueryFromDsl
     fun from(table: String) {
@@ -34,11 +34,11 @@ class SqlSelectBuilder {
 
     @QueryWhereDsl
     fun where(block: SqlWhereBuilder.() -> Unit) {
-        where.apply(block)
+        conditions.add(0, SqlWhereBuilder().apply(block))
     }
 
     fun or(block: SqlWhereBuilder.() -> Unit) {
-        where.setLogic(ConditionsLogic.OR).apply(block)
+        conditions.add(0, SqlWhereBuilder(ConditionsLogic.OR).apply(block))
     }
 
     fun build(): String {
@@ -46,7 +46,18 @@ class SqlSelectBuilder {
             throw Exception("Не установлена таблица")
         }
 
-        val whereStr = where.build()
+        /**
+         * TODO: Не очень красивая реализация блока where.
+         * Нужно подумать, как сделать, чтобы функция where не добавляла сразу объект в conditions.
+         * Тогда можно будет написать так: conditions.joinToString(separator = " and ") { it.build() }.
+         */
+        val whereParts = mutableListOf<String>()
+        for (c in conditions) {
+            if (c.hasConditions()) {
+                whereParts.add(c.build())
+            }
+        }
+        val whereStr = whereParts.joinToString(separator = " and ")
 
         return Select(
             tableName, columns, whereStr
