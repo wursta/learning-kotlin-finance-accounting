@@ -34,11 +34,15 @@ class SqlSelectBuilder {
 
     @QueryWhereDsl
     fun where(block: SqlWhereBuilder.() -> Unit) {
-        whereBlockBuilders.add(0, SqlWhereBuilder().apply(block))
+        val builder = SqlWhereBuilder()
+        whereBlockBuilders.add(builder)
+        builder.apply(block)
     }
 
     fun or(block: SqlWhereBuilder.() -> Unit) {
-        whereBlockBuilders.add(0, SqlWhereBuilder(ConditionsLogic.OR).apply(block))
+        val builder = SqlWhereBuilder(ConditionsLogic.OR)
+        whereBlockBuilders.add(builder)
+        builder.apply(block)
     }
 
     fun build(): Select {

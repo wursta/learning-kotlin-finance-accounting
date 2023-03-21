@@ -39,3 +39,21 @@ query {
     from("table_1")
 }
 ```
+
+Пример №4
+```sql
+select col_a, col_b from table where col_a = 'test' and (col_b is null or col_b = 5)
+```
+```kotlin
+query {
+    select("col_a", "col_b")
+    from("table")
+    where {
+        "col_a" eq "test"
+        or {
+            "col_b" eq null
+            "col_b" eq 5
+        }
+    }
+}
+```
