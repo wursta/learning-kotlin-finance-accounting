@@ -18,7 +18,7 @@ fun query(block: SqlSelectBuilder.() -> Unit) = SqlSelectBuilder().apply(block)
 class SqlSelectBuilder {
     private var tableName: String = ""
     private var columns: MutableList<Column> = mutableListOf()
-    private var conditions: MutableList<SqlWhereBuilder> = mutableListOf()
+    private var whereBlockBuilders: MutableList<SqlWhereBuilder> = mutableListOf()
 
     @QueryFromDsl
     fun from(table: String) {
@@ -34,11 +34,11 @@ class SqlSelectBuilder {
 
     @QueryWhereDsl
     fun where(block: SqlWhereBuilder.() -> Unit) {
-        conditions.add(0, SqlWhereBuilder().apply(block))
+        whereBlockBuilders.add(0, SqlWhereBuilder().apply(block))
     }
 
     fun or(block: SqlWhereBuilder.() -> Unit) {
-        conditions.add(0, SqlWhereBuilder(ConditionsLogic.OR).apply(block))
+        whereBlockBuilders.add(0, SqlWhereBuilder(ConditionsLogic.OR).apply(block))
     }
 
     fun build(): Select {
@@ -52,7 +52,7 @@ class SqlSelectBuilder {
          * Тогда можно будет написать так: conditions.joinToString(separator = " and ") { it.build() }.
          */
         val whereBlocks = mutableListOf<Where>()
-        for (c in conditions) {
+        for (c in whereBlockBuilders) {
             if (c.hasConditions()) {
                 whereBlocks.add(c.build())
             }
