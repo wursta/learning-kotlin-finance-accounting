@@ -12,7 +12,7 @@ allprojects {
 }
 
 subprojects {
-    group = "local.kotlin-learning"
+    group = "local.kotlin.learning"
     version = "1.0-SNAPSHOT"
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>{
