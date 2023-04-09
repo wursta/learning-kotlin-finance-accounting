@@ -19,6 +19,7 @@ services:
       # используемый драйвер логгирования
       driver: "fluentd"
       options:
+        fluentd-async: "true"
         # куда посылать лог-сообщения, необходимо чтобы адрес
         # совпадал с настройками плагина forward
         fluentd-address: localhost:24224
@@ -27,7 +28,7 @@ services:
         tag: app.logs
 
   fluent-bit:
-    container_name: fluent-bit
+    #container_name: fluent-bit
     image: fluent/fluent-bit
     ports:
       # необходимо открыть порты, которые используются плагином forward
@@ -85,7 +86,7 @@ services:
 
   dashboards:
     image: opensearchproject/opensearch-dashboards:latest
-    container_name: opensearch-dashboards
+    #container_name: opensearch-dashboards
     ports:
       - 5601:5601
     expose:
