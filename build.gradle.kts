@@ -2,8 +2,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    application
 }
+
+group = "local.learning"
+version = "1.0-SNAPSHOT"
+
 
 allprojects {
     repositories {
@@ -14,8 +17,8 @@ allprojects {
 }
 
 subprojects {
-    group = "local.kotlin.learning"
-    version = "1.0-SNAPSHOT"
+    this.group = group
+    this.version = version
 
     tasks.withType<KotlinCompile>{
         kotlinOptions.jvmTarget = "17"

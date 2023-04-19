@@ -1,0 +1,192 @@
+openapi: 3.0.4
+info:
+  title: "Personal Financial Management Service"
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/v1
+tags:
+  - name: Card
+    description: Банковская карта
+paths:
+  /card/create:
+    post:
+      tags:
+        - Card
+      summary: Добавление банковской карты
+      operationId: cardCreate
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardCreateRequest'
+        required: true
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardCreateResponse'
+  /card/read:
+    post:
+      tags:
+        - Card
+      summary: Получение данных банковской карты
+      operationId: cardRead
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardReadRequest'
+        required: true
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardReadResponse'
+  /card/update:
+    post:
+      tags:
+        - Card
+      summary: Обновление данных банковской карты
+      operationId: cardUpdate
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardUpdateRequest'
+        required: true
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardUpdateResponse'
+  /card/delete:
+    post:
+      tags:
+        - Card
+      summary: Удаление банковской карты
+      operationId: cardDelete
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardDeleteRequest'
+        required: true
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardDeleteResponse'
+components:
+  schemas:
+    # COMMON
+    IRequest:
+      type: object
+      description: Мета-данные для всех запросов
+      properties:
+        requestType:
+          type: string
+          description: Поле с информацией о типе запроса
+          example: create
+        requestId:
+          type: string
+          description: Идентификатор запроса для отладки
+      discriminator:
+        propertyName: requestType
+        mapping:
+          create: '#/components/schemas/CardCreateRequest'
+          read: '#/components/schemas/CardReadRequest'
+          update: '#/components/schemas/CardUpdateRequest'
+          delete: '#/components/schemas/CardDeleteRequest'
+
+    IResponse:
+      type: object
+      description: Мета-данные для всех ответов
+      properties:
+        responseType:
+          type: string
+          description: Поле с информацией о типе ответа
+          example: create
+        requestId:
+          type: string
+          description: Идентификатор запроса для отладки
+        result:
+          $ref: './schemas/ResponseResult.yaml#/ResponseResult'
+        errors:
+          type: array
+          items:
+            $ref: './schemas/ResponseError.yaml#/ResponseError'
+      discriminator:
+        propertyName: requestType
+        mapping:
+          create: '#/components/schemas/CardCreateResponse'
+          read: '#/components/schemas/CardReadResponse'
+          update: '#/components/schemas/CardUpdateResponse'
+          delete: '#/components/schemas/CardDeleteResponse'
+
+    # CardCreate
+    CardCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - type: object
+          properties:
+            card:
+              $ref: './schemas/Card.yaml#/CardCreateObject'
+
+    CardCreateResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: './schemas/Card.yaml#/CardResponseSingle'
+
+    # CardRead
+    CardReadRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - type: object
+          properties:
+            guid:
+              $ref: './schemas/Card.yaml#/CardGUID'
+
+    CardReadResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: './schemas/Card.yaml#/CardResponseSingle'
+
+    # CardUpdate
+    CardUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - type: object
+          properties:
+            card:
+              $ref: './schemas/Card.yaml#/CardObject'
+
+    CardUpdateResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: './schemas/Card.yaml#/CardResponseSingle'
+
+    # CardDelete
+    CardDeleteRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - type: object
+          properties:
+            guid:
+              $ref: './schemas/Card.yaml#/CardGUID'
+
+    CardDeleteResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: './schemas/Card.yaml#/CardResponseSingle'
