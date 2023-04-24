@@ -1,35 +1,36 @@
 package local.learning.api.v1
 
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import local.learning.api.serialization.utils.card.jsonSerializer
+import local.learning.api.serialization.utils.jsonSerializer
 import local.learning.api.v1.models.*
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class RequestSerializationTest {
-    private val createRequest: IRequest = CardCreateRequest(
-        requestType = "create",
+class CardRequestSerializationTest {
+    private val createRequest: IRequestDto = CardCreateRequestDto(
+        requestType = "cardCreate",
         requestId = "uniqueId",
-        card = CardCreateObject(
+        card = CardCreateObjectDto(
             number = "123",
             validFor = "2026-04",
             owner = "SAZONOV MIKHAIL"
         )
     )
 
-    private val readRequest: IRequest = CardReadRequest(
-        requestType = "read",
+    private val readRequest: IRequestDto = CardReadRequestDto(
+        requestType = "cardRead",
         requestId = "uniqueId",
         guid = "12345"
     )
 
-    private val updateRequest: IRequest = CardUpdateRequest(
-        requestType = "update",
+    private val updateRequest: IRequestDto = CardUpdateRequestDto(
+        requestType = "cardUpdate",
         requestId = "uniqueId",
-        card = CardObject(
+        card = CardObjectDto(
             guid = "12345",
             number = "123",
             validFor = "2026-04",
@@ -37,8 +38,8 @@ class RequestSerializationTest {
         )
     )
 
-    private val deleteRequest: IRequest = CardDeleteRequest(
-        requestType = "delete",
+    private val deleteRequest: IRequestDto = CardDeleteRequestDto(
+        requestType = "cardDelete",
         requestId = "uniqueId",
         guid = "12345"
     )
@@ -66,27 +67,44 @@ class RequestSerializationTest {
     @Test
     fun deserialize() {
         val createJson = jsonSerializer.encodeToString(createRequest)
-        val createRequest = jsonSerializer.decodeFromString<CardCreateRequest>(createJson)
-        assertIs<CardCreateRequest>(createRequest)
+        val createRequest = jsonSerializer.decodeFromString(createJson) as IRequestDto
+        assertIs<CardCreateRequestDto>(createRequest)
 
         val readJson = jsonSerializer.encodeToString(readRequest)
-        val readRequest = jsonSerializer.decodeFromString<CardReadRequest>(readJson)
-        assertIs<CardReadRequest>(readRequest)
+        val readRequest = jsonSerializer.decodeFromString(readJson) as IRequestDto
+        assertIs<CardReadRequestDto>(readRequest)
 
         val updateJson = jsonSerializer.encodeToString(updateRequest)
-        val updateRequest = jsonSerializer.decodeFromString<CardUpdateRequest>(updateJson)
-        assertIs<CardUpdateRequest>(updateRequest)
+        val updateRequest = jsonSerializer.decodeFromString(updateJson) as IRequestDto
+        assertIs<CardUpdateRequestDto>(updateRequest)
 
         val deleteJson = jsonSerializer.encodeToString(deleteRequest)
-        val deleteRequest = jsonSerializer.decodeFromString<CardDeleteRequest>(deleteJson)
-        assertIs<CardDeleteRequest>(deleteRequest)
+        val deleteRequest = jsonSerializer.decodeFromString(deleteJson) as IRequestDto
+        assertIs<CardDeleteRequestDto>(deleteRequest)
     }
 
-    //@Test(expected = SerializationException::class)
     @Test
+    fun deserializeNaked() {
+        val jsonString = """
+            {
+                "requestType":"cardCreate",
+                "requestId":"uniqueId",                                            
+                "card": {
+                    "number":"123",
+                    "valid_for": "2026-04",
+                    "owner":"SAZONOV MIKHAIL"
+                }
+            }
+        """.trimIndent()
+        val obj = jsonSerializer.decodeFromString(jsonString) as IRequestDto
+
+        assertEquals("uniqueId", obj.requestId)
+        assertEquals(createRequest, obj)
+    }
+
+    @Test(expected = SerializationException::class)
     fun tryDeserializeDummy() {
         val json = "{\"a\":1}"
-        val createRequest = jsonSerializer.decodeFromString<CardCreateRequest>(json)
-        assertNull(createRequest.requestType)
+        jsonSerializer.decodeFromString(json) as IRequestDto
     }
 }

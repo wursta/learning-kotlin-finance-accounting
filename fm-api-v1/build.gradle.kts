@@ -32,6 +32,7 @@ kotlin {
             }
         }
 
+
         @Suppress("UNUSED_VARIABLE")
         val jvmTest by getting {
             dependencies {
@@ -50,6 +51,7 @@ openApiGenerate {
     modelPackage.set("$openapiGroup.models")
     invokerPackage.set("$openapiGroup.invoker")
     inputSpec.set("$rootDir/specs/v1/openapi.yaml")
+    modelNameSuffix.set("Dto")
     library.set("multiplatform")
 
     globalProperties.apply {

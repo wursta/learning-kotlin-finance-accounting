@@ -1,0 +1,16 @@
+CategoryGUID:
+  type: string
+  description: GUID категории
+  format: uuid
+CategoryName:
+  type: string
+  description: Наименование категории
+
+CategoryObject:
+  type: object
+  description: Объект описывает свойства категории
+  properties:
+    guid:
+      $ref: './Category.yaml#/CategoryGUID'
+    name:
+      $ref: './Category.yaml#/CategoryName'

@@ -1,0 +1,134 @@
+ExpenseGUID:
+  type: string
+  description: GUID траты
+  format: uuid
+ExpenseCreateDT:
+  type: string
+  description: Дата/Время траты
+  format: 'date-time'
+ExpenseAmount:
+  type: number
+  description: Сумма траты
+  format: 'float'
+ExpenseSourceGUID:
+  type: string
+  nullable: true
+  description: Источник траты
+  format: uuid
+ExpenseCategoryGUID:
+  type: string
+  description: Категория траты
+  format: uuid
+
+ExpenseFilter:
+  type: object
+  properties:
+    amount_from:
+      type: number
+      nullable: true
+      description: Сумма траты "от"
+      format: 'float'
+    amount_to:
+      type: number
+      nullable: true
+      description: Сумма траты "до"
+      format: 'float'
+    date_from:
+      type: string
+      nullable: true
+      description: Дата/Время траты "от"
+      format: 'date-time'
+    date_to:
+      type: string
+      nullable: true
+      description: Дата/Время траты "до"
+      format: 'date-time'
+    sources:
+      type: array
+      items:
+        type: string
+        nullable: true
+        description: Источник траты
+        format: uuid
+
+ExpenseCreateObject:
+  type: object
+  description: Объект описывает свойства для создания траты
+  properties:
+    create_dt:
+      $ref: './Expense.yaml#/ExpenseCreateDT'
+    amount:
+      $ref: './Expense.yaml#/ExpenseAmount'
+    source:
+      $ref: './Expense.yaml#/ExpenseSourceGUID'
+    category:
+      $ref: './Expense.yaml#/ExpenseCategoryGUID'
+
+ExpenseObject:
+  type: object
+  description: Объект описывает свойства траты
+  properties:
+    guid:
+      $ref: './Expense.yaml#/ExpenseGUID'
+    create_dt:
+      $ref: './Expense.yaml#/ExpenseCreateDT'
+    amount:
+      $ref: './Expense.yaml#/ExpenseAmount'
+    source:
+      $ref: './Expense.yaml#/ExpenseSourceGUID'
+    category:
+      $ref: './Expense.yaml#/ExpenseCategoryGUID'
+
+ExpenseResponseSingle:
+  allOf:
+    - type: object
+      properties:
+        expense:
+          $ref: './Expense.yaml#/ExpenseObject'
+
+ExpenseResponseMulti:
+  allOf:
+    - type: object
+      properties:
+        expenses:
+          type: array
+          items:
+            $ref: './Expense.yaml#/ExpenseObject'
+
+ExpenseStatFilter:
+  allOf:
+    - type: object
+      properties:
+        date_from:
+          type: string
+          nullable: true
+          description: Дата "c"
+          format: 'date'
+        date_to:
+          type: string
+          nullable: true
+          description: Дата "по"
+          format: 'date'
+
+ExpenseStat:
+  allOf:
+    - type: object
+      properties:
+        total:
+          type: number
+          description: Сумма траты
+          format: 'float'
+        summary:
+          type: array
+          items:
+            $ref: './Expense.yaml#/ExpenseStatSummaryItem'
+
+ExpenseStatSummaryItem:
+  type: object
+  properties:
+    category:
+      $ref: './Category.yaml#/CategoryObject'
+    amount:
+      type: number
+      description: Сумма траты
+      format: 'float'

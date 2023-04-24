@@ -88,6 +88,128 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardDeleteResponse'
+
+  /expense/create:
+    post:
+      tags:
+        - Expense
+      summary: Добавление траты
+      operationId: expenseCreate
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseCreateRequest'
+        required: true
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseCreateResponse'
+  /expense/read:
+    post:
+      tags:
+        - Card
+      summary: Получение данных траты
+      operationId: expenseRead
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseReadRequest'
+        required: true
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseReadResponse'
+  /expense/update:
+    post:
+      tags:
+        - Card
+      summary: Обновление данных траты
+      operationId: expenseUpdate
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseUpdateRequest'
+        required: true
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseUpdateResponse'
+  /expense/delete:
+    post:
+      tags:
+        - Card
+      summary: Удаление траты
+      operationId: expenseDelete
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseDeleteRequest'
+        required: true
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseDeleteResponse'
+  /expense/search:
+    post:
+      tags:
+        - Card
+      summary: Поиск траты по фильтрам
+      operationId: expenseSearch
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseSearchRequest'
+        required: true
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseSearchResponse'
+  /expense/stats:
+    post:
+      tags:
+        - Card
+      summary: Поиск статистики по тратам
+      operationId: expenseStats
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseStatsRequest'
+        required: true
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseStatsResponse'
+
 components:
   schemas:
     # COMMON
@@ -190,3 +312,81 @@ components:
       allOf:
         - $ref: '#/components/schemas/IResponse'
         - $ref: './schemas/Card.yaml#/CardResponseSingle'
+
+    # ExpenseCreate
+    ExpenseCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - type: object
+          properties:
+            expense:
+              $ref: './schemas/Expense.yaml#/ExpenseCreateObject'
+
+    ExpenseCreateResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: './schemas/Expense.yaml#/ExpenseResponseSingle'
+
+    # ExpenseRead
+    ExpenseReadRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - type: object
+          properties:
+            guid:
+              $ref: './schemas/Expense.yaml#/ExpenseGUID'
+
+    ExpenseReadResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: './schemas/Expense.yaml#/ExpenseResponseSingle'
+
+    # ExpenseUpdate
+    ExpenseUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - type: object
+          properties:
+            card:
+              $ref: './schemas/Expense.yaml#/ExpenseObject'
+
+    ExpenseUpdateResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: './schemas/Expense.yaml#/ExpenseResponseSingle'
+
+    # ExpenseDelete
+    ExpenseDeleteRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - type: object
+          properties:
+            guid:
+              $ref: './schemas/Expense.yaml#/ExpenseGUID'
+
+    ExpenseDeleteResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: './schemas/Expense.yaml#/ExpenseResponseSingle'
+
+    # ExpenseSearch
+    ExpenseSearchRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: './schemas/Expense.yaml#/ExpenseFilter'
+
+    ExpenseSearchResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: './schemas/Expense.yaml#/ExpenseResponseMulti'
+
+    # ExpenseStats
+    ExpenseStatsRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: './schemas/Expense.yaml#/ExpenseStatFilter'
+
+    ExpenseStatsResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: './schemas/Expense.yaml#/ExpenseStat'

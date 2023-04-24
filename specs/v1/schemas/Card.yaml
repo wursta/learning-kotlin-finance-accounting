@@ -1,6 +1,7 @@
 CardGUID:
   type: string
   description: GUID карты
+  format: uuid
 CardNumber:
   type: string
   description: Номер карты
