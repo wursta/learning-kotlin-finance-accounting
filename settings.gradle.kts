@@ -14,3 +14,5 @@ pluginManagement {
 
 include("fm-acceptance")
 include("fm-api-v1")
+include("fm-common")
+include("fm-mappers")
