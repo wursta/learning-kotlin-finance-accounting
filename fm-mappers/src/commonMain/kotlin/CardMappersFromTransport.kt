@@ -1,17 +1,19 @@
-package local.learning.mappers.v1
+package local.learning.mappers
 
-import local.learning.api.v1.models.*
-import local.learning.common.helpers.isNumberValid
-import local.learning.common.helpers.isValidForValid
+import local.learning.api.models.*
+import local.learning.common.CardContext
+import local.learning.common.helpers.*
 import local.learning.common.models.RequestId
+import local.learning.common.models.bank.BankGuid
 import local.learning.common.models.card.Card
 import local.learning.common.models.card.CardCommand
-import local.learning.common.models.card.CardContext
 import local.learning.common.models.card.CardGuid
-import local.learning.mappers.v1.exceptions.InvalidFieldFormat
-import local.learning.mappers.v1.exceptions.UnknownRequestClass
+import local.learning.mappers.exceptions.InvalidFieldFormat
+import local.learning.mappers.exceptions.UnknownRequestClass
 
 private fun IRequestDto?.requestId() = this?.requestId?.let { RequestId(it) } ?: RequestId.NONE
+
+private fun String?.toBankGuid() = this?.let { BankGuid(it) } ?: BankGuid.NONE
 private fun String?.toCardGuid() = this?.let { CardGuid(it) } ?: CardGuid.NONE
 private fun String?.toCardWithGuId() = Card(guid = this.toCardGuid())
 @Suppress("unused")
@@ -51,13 +53,20 @@ private fun CardCreateObjectDto.toInternal(): Card {
     return Card(
         number = this.number ?: "",
         validFor = this.validFor ?: "",
-        owner = this.owner ?: ""
+        owner = this.owner ?: "",
+        bankGuid = this.bank.toBankGuid()
     ).also {
-        if (it.isNumberValid()) {
-            throw InvalidFieldFormat("number", "0000-0000-0000-0000")
+        if (!it.isNumberValid()) {
+            throw InvalidFieldFormat("number", "0000000000000000")
         }
-        if (it.isValidForValid()) {
+        if (!it.isValidForValid()) {
             throw InvalidFieldFormat("valid_for", "Y-m")
+        }
+        if (!it.isOwnerValid()) {
+            throw InvalidFieldFormat("owner", "String: from 3 to 50 chars")
+        }
+        if (!it.isBankGuidValid()) {
+            throw InvalidFieldFormat("bank", "1598044e-5259-11e9-8647-d663bd873d93")
         }
     }
 }
@@ -67,13 +76,23 @@ private fun CardObjectDto.toInternal(): Card {
         guid = CardGuid(this.guid ?: ""),
         number = this.number ?: "",
         validFor = this.validFor ?: "",
-        owner = this.owner ?: ""
+        owner = this.owner ?: "",
+        bankGuid = BankGuid(this.bank?.guid ?: "")
     ).also {
-        if (it.isNumberValid()) {
-            throw InvalidFieldFormat("number", "0000-0000-0000-0000")
+        if (!it.isGuidValid()) {
+            throw InvalidFieldFormat("guid", "1598044e-5259-11e9-8647-d663bd873d93")
         }
-        if (it.isValidForValid()) {
+        if (!it.isNumberValid()) {
+            throw InvalidFieldFormat("number", "0000000000000000")
+        }
+        if (!it.isValidForValid()) {
             throw InvalidFieldFormat("valid_for", "Y-m")
+        }
+        if (!it.isOwnerValid()) {
+            throw InvalidFieldFormat("owner", "String: from 3 to 50 chars")
+        }
+        if (!it.isBankGuidValid()) {
+            throw InvalidFieldFormat("bank", "1598044e-5259-11e9-8647-d663bd873d93")
         }
     }
 }

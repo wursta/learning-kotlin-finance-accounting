@@ -11,7 +11,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
 
-                implementation(project(":fm-api-v1"))
+                implementation(project(":fm-api"))
                 implementation(project(":fm-common"))
             }
         }

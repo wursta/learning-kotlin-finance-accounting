@@ -10,8 +10,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.modules.SerializersModuleBuilder
 import kotlinx.serialization.modules.contextual
-import local.learning.api.v1.models.IRequestDto
-import local.learning.api.v1.models.IResponseDto
+import local.learning.api.models.IRequestDto
+import local.learning.api.models.IResponseDto
 import kotlin.reflect.KClass
 
 internal data class PolymorphicInfo<S : Any, T : S>(

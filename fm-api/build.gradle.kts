@@ -44,7 +44,7 @@ kotlin {
 }
 
 openApiGenerate {
-    val openapiGroup = "${rootProject.group}.api.v1"
+    val openapiGroup = "${rootProject.group}.api"
     generatorName.set("kotlin")
     packageName.set(openapiGroup)
     apiPackage.set("$openapiGroup.api")

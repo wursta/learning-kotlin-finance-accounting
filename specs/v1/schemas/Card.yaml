@@ -24,6 +24,8 @@ CardCreateObject:
       $ref: './Card.yaml#/CardValidFor'
     owner:
       $ref: './Card.yaml#/CardOwner'
+    bank:
+      $ref: './Bank.yaml#/BankGUID'
 
 CardObject:
   type: object
@@ -37,6 +39,8 @@ CardObject:
       $ref: './Card.yaml#/CardValidFor'
     owner:
       $ref: './Card.yaml#/CardOwner'
+    bank:
+      $ref: './Bank.yaml#/BankObject'
 
 CardResponseSingle:
   allOf:

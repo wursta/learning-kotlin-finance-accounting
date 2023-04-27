@@ -2,7 +2,7 @@ package local.learning.api.serialization.utils
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
-import local.learning.api.v1.models.*
+import local.learning.api.models.*
 
 internal val infos = listOf(
     // Cards requests

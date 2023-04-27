@@ -1,11 +1,11 @@
-package local.learning.common.models.card
+package local.learning.common.models.bank
 
 @JvmInline
-value class CardGuid(private val guid: String) {
+value class BankGuid(private val guid: String) {
     fun asString() = guid
 
     fun isValid(): Boolean = guid.matches(Regex("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"))
     companion object {
-        val NONE = CardGuid("")
+        val NONE = BankGuid("")
     }
 }

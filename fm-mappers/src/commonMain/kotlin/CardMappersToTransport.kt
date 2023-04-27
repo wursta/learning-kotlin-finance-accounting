@@ -1,12 +1,12 @@
-package local.learning.mappers.v1
+package local.learning.mappers
 
-import local.learning.api.v1.models.*
+import local.learning.api.models.*
+import local.learning.common.CardContext
 import local.learning.common.models.Error
 import local.learning.common.models.card.Card
 import local.learning.common.models.card.CardCommand
-import local.learning.common.models.card.CardContext
 import local.learning.common.models.card.CardGuid
-import local.learning.mappers.v1.exceptions.UnknownCardCommand
+import local.learning.mappers.exceptions.UnknownCardCommand
 
 fun CardContext.toTransport(): IResponseDto = when(val cmd = command) {
     CardCommand.CREATE -> toTransportCreate()
@@ -48,7 +48,10 @@ private fun Card.toTransport(): CardObjectDto = CardObjectDto(
     guid = guid.takeIf { it != CardGuid.NONE }?.asString(),
     number = number.takeIf { it.isNotBlank() },
     validFor = validFor.takeIf { it.isNotBlank() },
-    owner = owner.takeIf { it.isNotBlank() }
+    owner = owner.takeIf { it.isNotBlank() },
+    bank = BankObjectDto(
+        guid = bankGuid.asString()
+    )
 )
 
 private fun List<Error>.toTransportErrors(): List<ResponseErrorDto>? = this

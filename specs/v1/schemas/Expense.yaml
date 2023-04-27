@@ -10,15 +10,6 @@ ExpenseAmount:
   type: number
   description: Сумма траты
   format: 'float'
-ExpenseSourceGUID:
-  type: string
-  nullable: true
-  description: Источник траты
-  format: uuid
-ExpenseCategoryGUID:
-  type: string
-  description: Категория траты
-  format: uuid
 
 ExpenseFilter:
   type: object
@@ -43,7 +34,7 @@ ExpenseFilter:
       nullable: true
       description: Дата/Время траты "до"
       format: 'date-time'
-    sources:
+    cards:
       type: array
       items:
         type: string
@@ -59,10 +50,10 @@ ExpenseCreateObject:
       $ref: './Expense.yaml#/ExpenseCreateDT'
     amount:
       $ref: './Expense.yaml#/ExpenseAmount'
-    source:
-      $ref: './Expense.yaml#/ExpenseSourceGUID'
+    card:
+      $ref: './Card.yaml#/CardGUID'
     category:
-      $ref: './Expense.yaml#/ExpenseCategoryGUID'
+      $ref: './Category.yaml#/CategoryGUID'
 
 ExpenseObject:
   type: object
@@ -74,10 +65,10 @@ ExpenseObject:
       $ref: './Expense.yaml#/ExpenseCreateDT'
     amount:
       $ref: './Expense.yaml#/ExpenseAmount'
-    source:
-      $ref: './Expense.yaml#/ExpenseSourceGUID'
+    card:
+      $ref: './Card.yaml#/CardGUID'
     category:
-      $ref: './Expense.yaml#/ExpenseCategoryGUID'
+      $ref: './Category.yaml#/CategoryGUID'
 
 ExpenseResponseSingle:
   allOf:

@@ -1,4 +1,4 @@
-package local.learning.mappers.v1.exceptions
+package local.learning.mappers.exceptions
 
 import local.learning.common.models.card.CardCommand
 

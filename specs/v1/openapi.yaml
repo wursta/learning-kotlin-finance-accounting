@@ -227,10 +227,16 @@ components:
       discriminator:
         propertyName: requestType
         mapping:
-          create: '#/components/schemas/CardCreateRequest'
-          read: '#/components/schemas/CardReadRequest'
-          update: '#/components/schemas/CardUpdateRequest'
-          delete: '#/components/schemas/CardDeleteRequest'
+          cardCreate: '#/components/schemas/CardCreateRequest'
+          cardRead: '#/components/schemas/CardReadRequest'
+          cardUpdate: '#/components/schemas/CardUpdateRequest'
+          cardDelete: '#/components/schemas/CardDeleteRequest'
+          expenseCreate: '#/components/schemas/ExpenseCreateRequest'
+          expenseRead: '#/components/schemas/ExpenseReadRequest'
+          expenseUpdate: '#/components/schemas/ExpenseUpdateRequest'
+          expenseDelete: '#/components/schemas/ExpenseDeleteRequest'
+          expensesSearch: '#/components/schemas/ExpenseSearchRequest'
+          expensesStats: '#/components/schemas/ExpenseStatsRequest'
 
     IResponse:
       type: object
@@ -252,10 +258,16 @@ components:
       discriminator:
         propertyName: requestType
         mapping:
-          create: '#/components/schemas/CardCreateResponse'
-          read: '#/components/schemas/CardReadResponse'
-          update: '#/components/schemas/CardUpdateResponse'
-          delete: '#/components/schemas/CardDeleteResponse'
+          cardCreate: '#/components/schemas/CardCreateResponse'
+          cardRead: '#/components/schemas/CardReadResponse'
+          cardUpdate: '#/components/schemas/CardUpdateResponse'
+          cardDelete: '#/components/schemas/CardDeleteResponse'
+          expenseCreate: '#/components/schemas/ExpenseCreateResponse'
+          expenseRead: '#/components/schemas/ExpenseReadResponse'
+          expenseUpdate: '#/components/schemas/ExpenseUpdateResponse'
+          expenseDelete: '#/components/schemas/ExpenseDeleteResponse'
+          expensesSearch: '#/components/schemas/ExpenseSearchResponse'
+          expensesStats: '#/components/schemas/ExpenseStatsResponse'
 
     # CardCreate
     CardCreateRequest:
@@ -347,7 +359,7 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
-            card:
+            expense:
               $ref: './schemas/Expense.yaml#/ExpenseObject'
 
     ExpenseUpdateResponse:
