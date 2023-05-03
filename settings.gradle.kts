@@ -1,13 +1,18 @@
 
 rootProject.name = "finance-management"
-//include("m1l1-helloworld")
-//include("m1l3-oop")
-//include("m1l4-dsl")
-include("fm-acceptance")
 
 pluginManagement {
     val kotlinVersion: String by settings
+    val openapiVersion: String by settings
+
     plugins {
         kotlin("jvm") version kotlinVersion apply false
+        kotlin("plugin.serialization") version kotlinVersion apply false
+        id("org.openapi.generator") version openapiVersion apply false
     }
 }
+
+include("fm-acceptance")
+include("fm-api")
+include("fm-common")
+include("fm-mappers")

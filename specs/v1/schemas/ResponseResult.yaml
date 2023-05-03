@@ -1,0 +1,5 @@
+ResponseResult:
+  type: string
+  enum:
+    - success
+    - error

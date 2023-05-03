@@ -1,0 +1,16 @@
+BankGUID:
+  type: string
+  description: GUID категории
+  format: uuid
+BankName:
+  type: string
+  description: Наименование категории
+
+BankObject:
+  type: object
+  description: Объект описывает свойства банка
+  properties:
+    guid:
+      $ref: './Bank.yaml#/BankGUID'
+    name:
+      $ref: './Bank.yaml#/BankName'

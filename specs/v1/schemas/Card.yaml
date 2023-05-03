@@ -1,0 +1,50 @@
+CardGUID:
+  type: string
+  description: GUID карты
+  format: uuid
+CardNumber:
+  type: string
+  description: Номер карты
+  pattern: '^\d{4}-\d{4}-\d{4}-\d{4}$'
+CardValidFor:
+  type: string
+  description: Срок действия
+  pattern: '^\d{4}-\d{2}$'
+CardOwner:
+  type: string
+  description: Владелец
+
+CardCreateObject:
+  type: object
+  description: Объект описывает свойства для создания банковской карты
+  properties:
+    number:
+      $ref: './Card.yaml#/CardNumber'
+    valid_for:
+      $ref: './Card.yaml#/CardValidFor'
+    owner:
+      $ref: './Card.yaml#/CardOwner'
+    bank:
+      $ref: './Bank.yaml#/BankGUID'
+
+CardObject:
+  type: object
+  description: Объект описывает свойства для обновления банковской карты
+  properties:
+    guid:
+      $ref: './Card.yaml#/CardGUID'
+    number:
+      $ref: './Card.yaml#/CardNumber'
+    valid_for:
+      $ref: './Card.yaml#/CardValidFor'
+    owner:
+      $ref: './Card.yaml#/CardOwner'
+    bank:
+      $ref: './Bank.yaml#/BankObject'
+
+CardResponseSingle:
+  allOf:
+    - type: object
+      properties:
+        card:
+          $ref: './Card.yaml#/CardObject'

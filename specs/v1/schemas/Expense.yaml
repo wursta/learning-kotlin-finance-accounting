@@ -1,0 +1,102 @@
+ExpenseGUID:
+  type: string
+  description: GUID траты
+  format: uuid
+ExpenseCreateDT:
+  type: string
+  description: Дата/Время траты
+  format: 'date-time'
+ExpenseAmount:
+  type: number
+  description: Сумма траты
+  format: 'double'
+
+ExpenseFilter:
+  type: object
+  properties:
+    amount_from:
+      $ref: './Expense.yaml#/ExpenseAmount'
+    amount_to:
+      $ref: './Expense.yaml#/ExpenseAmount'
+    date_from:
+      $ref: './Expense.yaml#/ExpenseCreateDT'
+    date_to:
+      $ref: './Expense.yaml#/ExpenseCreateDT'
+    cards:
+      type: array
+      items:
+        $ref: './Expense.yaml#/ExpenseGUID'
+
+ExpenseCreateObject:
+  type: object
+  description: Объект описывает свойства для создания траты
+  properties:
+    create_dt:
+      $ref: './Expense.yaml#/ExpenseCreateDT'
+    amount:
+      $ref: './Expense.yaml#/ExpenseAmount'
+    card:
+      $ref: './Card.yaml#/CardGUID'
+    category:
+      $ref: './Category.yaml#/CategoryGUID'
+
+ExpenseObject:
+  type: object
+  description: Объект описывает свойства траты
+  properties:
+    guid:
+      $ref: './Expense.yaml#/ExpenseGUID'
+    create_dt:
+      $ref: './Expense.yaml#/ExpenseCreateDT'
+    amount:
+      $ref: './Expense.yaml#/ExpenseAmount'
+    card:
+      $ref: './Card.yaml#/CardGUID'
+    category:
+      $ref: './Category.yaml#/CategoryGUID'
+
+ExpenseResponseSingle:
+  allOf:
+    - type: object
+      properties:
+        expense:
+          $ref: './Expense.yaml#/ExpenseObject'
+
+ExpenseResponseMulti:
+  allOf:
+    - type: object
+      properties:
+        expenses:
+          type: array
+          items:
+            $ref: './Expense.yaml#/ExpenseObject'
+
+ExpenseStatFilter:
+  allOf:
+    - type: object
+      properties:
+        date_from:
+          $ref: './Expense.yaml#/ExpenseCreateDT'
+        date_to:
+          $ref: './Expense.yaml#/ExpenseCreateDT'
+
+ExpenseStat:
+  allOf:
+    - type: object
+      properties:
+        total:
+          $ref: './Expense.yaml#/ExpenseAmount'
+        summary:
+          type: array
+          items:
+            $ref: './Expense.yaml#/ExpenseStatSummaryItem'
+
+ExpenseStatSummaryItem:
+  type: object
+  properties:
+    category:
+      $ref: './Category.yaml#/CategoryObject'
+    amount:
+      type: number
+      description: Сумма траты
+      format: 'double'
