@@ -16,7 +16,7 @@ class ExpenseRequestSerializationTest {
         requestId = "1bdf67a7-59ed-4ff1-aa32-cb06d0c9b8f9",
         expense = ExpenseCreateObjectDto(
             createDt = "2023-04-24T19:09:06.043Z",
-            amount = 100.40F,
+            amount = 100.40,
             card = "c9b8c97d-c66e-4eb0-851f-8dafadd1af56",
             category = "e7021137-6995-4870-9522-5a0abe554ada"
         )
@@ -26,7 +26,7 @@ class ExpenseRequestSerializationTest {
         requestType = "expensesSearch",
         requestId = "1bdf67a7-59ed-4ff1-aa32-cb06d0c9b8f9",
         cards = listOf("c9b8c97d-c66e-4eb0-851f-8dafadd1af56", "2ae4dffc-5506-4783-8a44-c73156b86165"),
-        amountFrom = 50.5F,
+        amountFrom = 50.5,
         dateFrom = "2023-04-24T00:00:00.043Z"
     )
 

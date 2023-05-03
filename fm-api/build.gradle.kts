@@ -70,7 +70,6 @@ openApiGenerate {
 
 openApiValidate {
     inputSpec.set("$rootDir/specs/v1/openapi.yaml")
-    recommend.set(true)
 }
 
 afterEvaluate {

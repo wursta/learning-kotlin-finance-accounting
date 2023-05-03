@@ -3,6 +3,9 @@ package local.learning.mappers
 import kotlinx.datetime.Instant
 import local.learning.api.models.*
 import local.learning.common.ExpenseContext
+import local.learning.common.INSTANT_NEGATIVE_INFINITY
+import local.learning.common.INSTANT_NONE
+import local.learning.common.INSTANT_POSITIVE_INFINITY
 import local.learning.common.helpers.isAmountValid
 import local.learning.common.helpers.isCardGuidValid
 import local.learning.common.helpers.isCategoryGuidValid
@@ -13,10 +16,8 @@ import local.learning.common.models.category.CategoryGuid
 import local.learning.common.models.expense.*
 import local.learning.mappers.exceptions.InvalidFieldFormat
 import local.learning.mappers.exceptions.UnknownRequestClass
+import java.math.BigDecimal
 
-internal val INSTANT_NONE = Instant.fromEpochMilliseconds(Long.MIN_VALUE)
-internal val INSTANT_NEGATIVE_INFINITY = Instant.fromEpochMilliseconds(Long.MIN_VALUE)
-internal val INSTANT_POSITIVE_INFINITY = Instant.fromEpochMilliseconds(Long.MAX_VALUE)
 private fun IRequestDto?.requestId() = this?.requestId?.let { RequestId(it) } ?: RequestId.NONE
 private fun String?.toExpenseGuid() = this?.let { ExpenseGuid(it) } ?: ExpenseGuid.NONE
 private fun String?.toExpenseWithGuId() = Expense(guid = this.toExpenseGuid())
@@ -66,8 +67,8 @@ fun ExpenseContext.fromTransport(request: ExpenseSearchRequestDto) {
     requestId = request.requestId()
     command = ExpenseCommand.SEARCH
     expenseSearchRequest = ExpenseSearchFilter(
-        amountFrom = request.amountFrom.takeIf { it != null } ?: Float.NEGATIVE_INFINITY,
-        amountTo = request.amountTo.takeIf { it != null } ?: Float.POSITIVE_INFINITY,
+        amountFrom = request.amountFrom.takeIf { it != null }?.let { BigDecimal(it) } ?: BigDecimal.valueOf(-1),
+        amountTo = request.amountTo.takeIf { it != null }?.let { BigDecimal(it) } ?: BigDecimal.valueOf(-1),
         dateFrom = request.dateFrom?.let { Instant.parse(it) } ?: INSTANT_NEGATIVE_INFINITY,
         dateTo = request.dateTo?.let { Instant.parse(it) } ?: INSTANT_POSITIVE_INFINITY,
         sources = request.cards?.toInternalSourcesGuidsList() ?: mutableListOf()
@@ -86,7 +87,7 @@ fun ExpenseContext.fromTransport(request: ExpenseStatsRequestDto) {
 private fun ExpenseCreateObjectDto.toInternal(): Expense {
     return Expense(
         createDT = createDt?.let { Instant.parse(it) } ?: INSTANT_NONE,
-        amount = this.amount ?: 0F,
+        amount = this.amount.takeIf { it != null }?.let { BigDecimal(it) } ?: BigDecimal.ZERO,
         cardGuid = this.card.toCardGuid(),
         categoryGuid = this.category.toCategoryGuid()
     ).also {
@@ -108,7 +109,7 @@ private fun ExpenseObjectDto.toInternal(): Expense {
     return Expense(
         guid = guid.toExpenseGuid(),
         createDT = createDt?.let { Instant.parse(it) } ?: INSTANT_NONE,
-        amount = this.amount ?: 0F,
+        amount = this.amount.takeIf { it != null }?.let { BigDecimal(it) } ?: BigDecimal.ZERO,
         cardGuid = this.card.toCardGuid(),
         categoryGuid = this.category.toCategoryGuid()
     ).also {

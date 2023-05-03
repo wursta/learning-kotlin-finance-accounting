@@ -14,6 +14,7 @@ import local.learning.common.models.expense.ExpenseCommand
 import local.learning.common.models.expense.ExpenseGuid
 import local.learning.common.models.expense.ExpenseSummaryByCategory
 import local.learning.mappers.exceptions.UnknownExpenseCommand
+import java.math.BigDecimal
 
 fun ExpenseContext.toTransport(): IResponseDto = when (val cmd = command) {
     ExpenseCommand.CREATE -> toTransportCreate()
@@ -64,14 +65,14 @@ fun ExpenseContext.toTransportStats() = ExpenseStatsResponseDto(
     requestId = this.requestId.asString().takeIf { it.isNotBlank() },
     result = if (state == State.RUNNING) ResponseResultDto.SUCCESS else ResponseResultDto.ERROR,
     errors = errors.toTransportErrors(),
-    total = expenseStatisticResponse.total,
+    total = expenseStatisticResponse.total.toDouble(),
     summary = expenseStatisticResponse.summaryByCategory.toExpensesSummaryByCategoryTransport()
 )
 
 private fun Expense.toTransport(): ExpenseObjectDto = ExpenseObjectDto(
     guid = guid.takeIf { it != ExpenseGuid.NONE }?.asString(),
     createDt = createDT.toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
-    amount = amount.takeIf { it != 0F },
+    amount = amount.takeIf { it != BigDecimal.ZERO }?.toDouble(),
     card = cardGuid.takeIf { it != CardGuid.NONE }?.asString(),
     category = categoryGuid.takeIf { it != CategoryGuid.NONE }?.asString(),
 )
@@ -88,7 +89,7 @@ private fun List<Expense>.toExpensesListTransport(): List<ExpenseObjectDto>? = t
 
 private fun ExpenseSummaryByCategory.toTransport(): ExpenseStatSummaryItemDto = ExpenseStatSummaryItemDto(
     category = category.toTransport(),
-    amount = amount
+    amount = amount.toDouble()
 )
 
 private fun List<ExpenseSummaryByCategory>.toExpensesSummaryByCategoryTransport(): List<ExpenseStatSummaryItemDto>? = this

@@ -19,7 +19,7 @@ class ExpenseResponseSerializationTest {
         expense = ExpenseObjectDto(
             guid = "3d4b3225-f379-4380-89fb-f8cfbe6722ad",
             createDt = "2023-04-24T19:09:06",
-            amount = 100.5F,
+            amount = 100.5,
             card = "a8585ea8-e039-4799-b16c-06dc92f641f9",
             category = "d08e4713-657e-4351-b983-536c1bae51b5",
         )
@@ -34,14 +34,14 @@ class ExpenseResponseSerializationTest {
             ExpenseObjectDto(
                 guid = "3d4b3225-f379-4380-89fb-f8cfbe6722ad",
                 createDt = "2023-04-24T19:09:06",
-                amount = 100.5F,
+                amount = 100.5,
                 card = "a8585ea8-e039-4799-b16c-06dc92f641f9",
                 category = "d08e4713-657e-4351-b983-536c1bae51b5",
             ),
             ExpenseObjectDto(
                 guid = "256fee33-5deb-4cc4-906f-db970ae3d277",
                 createDt = "2023-04-24T20:09:06",
-                amount = 50F,
+                amount = 50.0,
                 card = "8d295974-d106-413c-acc9-59584b3b11ed",
                 category = "8fe236f1-2877-4180-a966-148e740ca0be",
             )
@@ -53,21 +53,21 @@ class ExpenseResponseSerializationTest {
         requestId = "1bdf67a7-59ed-4ff1-aa32-cb06d0c9b8f9",
         result = ResponseResultDto.SUCCESS,
         errors = emptyList(),
-        total = 5000F,
+        total = 5000.0,
         summary = listOf(
             ExpenseStatSummaryItemDto(
                 category = CategoryObjectDto(
                     guid = "d08e4713-657e-4351-b983-536c1bae51b5",
                     name = "categoryName"
                 ),
-                amount = 500F
+                amount = 500.0
             ),
             ExpenseStatSummaryItemDto(
                 category = CategoryObjectDto(
                     guid = "8fe236f1-2877-4180-a966-148e740ca0be",
                     name = "categoryName2"
                 ),
-                amount = 1500F
+                amount = 1500.0
             )
         )
 

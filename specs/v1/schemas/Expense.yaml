@@ -9,38 +9,23 @@ ExpenseCreateDT:
 ExpenseAmount:
   type: number
   description: Сумма траты
-  format: 'float'
+  format: 'double'
 
 ExpenseFilter:
   type: object
   properties:
     amount_from:
-      type: number
-      nullable: true
-      description: Сумма траты "от"
-      format: 'float'
+      $ref: './Expense.yaml#/ExpenseAmount'
     amount_to:
-      type: number
-      nullable: true
-      description: Сумма траты "до"
-      format: 'float'
+      $ref: './Expense.yaml#/ExpenseAmount'
     date_from:
-      type: string
-      nullable: true
-      description: Дата/Время траты "от"
-      format: 'date-time'
+      $ref: './Expense.yaml#/ExpenseCreateDT'
     date_to:
-      type: string
-      nullable: true
-      description: Дата/Время траты "до"
-      format: 'date-time'
+      $ref: './Expense.yaml#/ExpenseCreateDT'
     cards:
       type: array
       items:
-        type: string
-        nullable: true
-        description: Источник траты
-        format: uuid
+        $ref: './Expense.yaml#/ExpenseGUID'
 
 ExpenseCreateObject:
   type: object
@@ -91,24 +76,16 @@ ExpenseStatFilter:
     - type: object
       properties:
         date_from:
-          type: string
-          nullable: true
-          description: Дата "c"
-          format: 'date'
+          $ref: './Expense.yaml#/ExpenseCreateDT'
         date_to:
-          type: string
-          nullable: true
-          description: Дата "по"
-          format: 'date'
+          $ref: './Expense.yaml#/ExpenseCreateDT'
 
 ExpenseStat:
   allOf:
     - type: object
       properties:
         total:
-          type: number
-          description: Сумма траты
-          format: 'float'
+          $ref: './Expense.yaml#/ExpenseAmount'
         summary:
           type: array
           items:
@@ -122,4 +99,4 @@ ExpenseStatSummaryItem:
     amount:
       type: number
       description: Сумма траты
-      format: 'float'
+      format: 'double'
