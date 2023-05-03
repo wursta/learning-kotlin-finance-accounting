@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: CI-Build
 
 # Controls when the workflow will run
 on:
@@ -26,11 +26,23 @@ jobs:
       - uses: actions/checkout@v3
 
       # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1      
+        
+      # https://github.com/actions/runner-images/issues/675
+      - name: Hack sources.list
+        run: sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu/|http://mirror.arizona.edu/ubuntu/|g' /etc/apt/sources.list
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      - name: Install curl-dev
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+        
+      - name: Run Tests
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: check
