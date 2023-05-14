@@ -3,10 +3,13 @@ info:
   title: "Personal Financial Management Service"
   version: 1.0.0
 servers:
-  - url: http://localhost:8080/v1
+  - url: http://localhost:8080/api
+    description: 'Local'
 tags:
   - name: Card
     description: Банковская карта
+  - name: Expense
+    description: Трата
 paths:
   /card/create:
     post:
@@ -28,6 +31,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardCreateResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorResponse'
   /card/read:
     post:
       tags:
@@ -48,6 +57,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardReadResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorResponse'
   /card/update:
     post:
       tags:
@@ -68,6 +83,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardUpdateResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorResponse'
   /card/delete:
     post:
       tags:
@@ -88,6 +109,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardDeleteResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorResponse'
 
   /expense/create:
     post:
@@ -109,10 +136,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExpenseCreateResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorResponse'
   /expense/read:
     post:
       tags:
-        - Card
+        - Expense
       summary: Получение данных траты
       operationId: expenseRead
       requestBody:
@@ -129,10 +162,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExpenseReadResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorResponse'
   /expense/update:
     post:
       tags:
-        - Card
+        - Expense
       summary: Обновление данных траты
       operationId: expenseUpdate
       requestBody:
@@ -149,10 +188,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExpenseUpdateResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorResponse'
   /expense/delete:
     post:
       tags:
-        - Card
+        - Expense
       summary: Удаление траты
       operationId: expenseDelete
       requestBody:
@@ -169,11 +214,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExpenseDeleteResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorResponse'
   /expense/search:
     post:
       tags:
-        - Card
-      summary: Поиск траты по фильтрам
+        - Expense
+      summary: Поиск трат по фильтрам
       operationId: expenseSearch
       requestBody:
         description: Request body
@@ -189,10 +240,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExpenseSearchResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorResponse'
   /expense/stats:
     post:
       tags:
-        - Card
+        - Expense
       summary: Поиск статистики по тратам
       operationId: expenseStats
       requestBody:
@@ -209,6 +266,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExpenseStatsResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorResponse'
 
 components:
   schemas:
@@ -268,6 +331,13 @@ components:
           expenseDelete: '#/components/schemas/ExpenseDeleteResponse'
           expensesSearch: '#/components/schemas/ExpenseSearchResponse'
           expensesStats: '#/components/schemas/ExpenseStatsResponse'
+
+    InternalErrorResponse:
+      type: object
+      description: Объект описывает свойства для внутренней ошибки сервера
+      properties:
+        message:
+          type: string
 
     # CardCreate
     CardCreateRequest:
