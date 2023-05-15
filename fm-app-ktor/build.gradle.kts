@@ -41,9 +41,8 @@ kotlin {
                 implementation(ktor("cio"))
                 implementation(ktor("content-negotiation"))
                 implementation(ktor("json", "serialization-kotlinx"))
-
-                //implementation(ktor("swagger"))
                 implementation(ktor ("status-pages"))
+                implementation(ktor ("cors"))
 
                 // Project
                 implementation(project(":fm-api"))
@@ -67,8 +66,3 @@ kotlin {
         }
     }
 }
-
-//copy {
-//    from("./../specs/v1")
-//    into("./resources/specs")
-//}
