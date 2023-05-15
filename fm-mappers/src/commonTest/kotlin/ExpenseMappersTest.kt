@@ -81,14 +81,14 @@ class ExpenseMappersTest {
     fun fromExpenseReadRequestTransport() {
         val req = ExpenseReadRequestDto(
             requestId = "uniqueRequestId",
-            guid = "cardGuid"
+            guid = "4001a513-8dc8-4b32-844c-76be5c0a67a3"
         )
 
         val context = ExpenseContext()
         context.fromTransport(req)
 
         assertEquals(ExpenseCommand.READ, context.command)
-        assertEquals(ExpenseGuid("cardGuid"), context.expenseRequest.guid)
+        assertEquals(ExpenseGuid("4001a513-8dc8-4b32-844c-76be5c0a67a3"), context.expenseRequest.guid)
     }
     @Test
     fun toExpenseReadResponseTransport() {
@@ -118,7 +118,7 @@ class ExpenseMappersTest {
         val req = ExpenseUpdateRequestDto(
             requestId = "uniqueRequestId",
             expense = ExpenseObjectDto(
-                guid = "expenseGuid",
+                guid = "bbd74256-e582-4e1c-aa19-a05cac64c589",
                 createDt = "2023-01-01T14:46:04Z",
                 amount = 540.4,
                 card = "1598044e-5259-11e9-8647-d663bd873d93",
@@ -130,7 +130,7 @@ class ExpenseMappersTest {
         context.fromTransport(req)
 
         assertEquals(ExpenseCommand.UPDATE, context.command)
-        assertEquals(ExpenseGuid("expenseGuid"), context.expenseRequest.guid)
+        assertEquals(ExpenseGuid("bbd74256-e582-4e1c-aa19-a05cac64c589"), context.expenseRequest.guid)
         assertEquals(Instant.parse("2023-01-01T14:46:04Z"), context.expenseRequest.createDT)
         assertEquals(BigDecimal(540.4), context.expenseRequest.amount)
         assertEquals(CardGuid("1598044e-5259-11e9-8647-d663bd873d93"), context.expenseRequest.cardGuid)
@@ -164,14 +164,14 @@ class ExpenseMappersTest {
     fun fromExpenseDeleteRequestTransport() {
         val req = ExpenseDeleteRequestDto(
             requestId = "uniqueRequestId",
-            guid = "expenseGuid"
+            guid = "bbd74256-e582-4e1c-aa19-a05cac64c589"
         )
 
         val context = ExpenseContext()
         context.fromTransport(req)
 
         assertEquals(ExpenseCommand.DELETE, context.command)
-        assertEquals(ExpenseGuid("expenseGuid"), context.expenseRequest.guid)
+        assertEquals(ExpenseGuid("bbd74256-e582-4e1c-aa19-a05cac64c589"), context.expenseRequest.guid)
     }
     @Test
     fun toExpenseDeleteResponseTransport() {

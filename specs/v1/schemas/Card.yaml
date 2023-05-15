@@ -5,7 +5,7 @@ CardGUID:
 CardNumber:
   type: string
   description: Номер карты
-  pattern: '^\d{4}-\d{4}-\d{4}-\d{4}$'
+  pattern: '^\d{16}$'
 CardValidFor:
   type: string
   description: Срок действия
