@@ -22,6 +22,14 @@ application {
     mainClass.set("io.ktor.server.cio.EngineMain")
 }
 
+ktor {
+    docker {
+        localImageName.set(project.name)
+        imageTag.set(project.version.toString())
+        jreVersion.set(io.ktor.plugin.features.JreVersion.JRE_17)
+    }
+}
+
 jib {
     container.mainClass = "io.ktor.server.cio.EngineMain"
 }

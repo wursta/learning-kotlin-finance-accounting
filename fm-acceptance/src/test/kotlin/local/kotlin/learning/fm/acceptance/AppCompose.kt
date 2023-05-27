@@ -6,7 +6,7 @@ import java.io.File
 @Suppress("unused")
 class AppCompose private constructor() {
     private val _service = "app_1"
-    private val _port = 80
+    private val _port = 8080
 
     private val compose =
         DockerComposeContainer(File("../deploy/docker-compose.yml")).apply {

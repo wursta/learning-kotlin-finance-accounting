@@ -16,20 +16,20 @@ object AppKafkaStrategy {
     fun getCardStrategy(config: AppKafkaConfig, processor: CardProcessor = CardProcessor()): TopicStrategy = TopicStrategy(
         processor = processor,
         topicsOut = listOf(config.kafkaCardTopicOut)
-    ) block@{
+    ) {
         val context = CardContext(timeStart = Clock.System.now())
         context.fromTransport(it)
         this.processor.exec(context)
-        return@block context.toTransport()
+        context.toTransport()
     }
 
     fun getExpenseStrategy(config: AppKafkaConfig, processor: ExpenseProcessor = ExpenseProcessor()): TopicStrategy = TopicStrategy(
         processor = processor,
         topicsOut = listOf(config.kafkaExpenseTopicOut)
-    ) block@{
+    ) {
         val context = ExpenseContext(timeStart = Clock.System.now())
         context.fromTransport(it)
         this.processor.exec(context)
-        return@block context.toTransport()
+        context.toTransport()
     }
 }

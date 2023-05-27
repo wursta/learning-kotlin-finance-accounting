@@ -4,11 +4,10 @@ plugins {
     kotlin("jvm")
 }
 
-group = "local.learning"
-version = "1.0-SNAPSHOT"
-
-
 allprojects {
+    group = "local.learning"
+    version = "latest"
+
     repositories {
         google()
         mavenCentral()
@@ -17,9 +16,6 @@ allprojects {
 }
 
 subprojects {
-    this.group = group
-    this.version = version
-
     tasks.withType<KotlinCompile>{
         kotlinOptions.jvmTarget = "17"
     }
