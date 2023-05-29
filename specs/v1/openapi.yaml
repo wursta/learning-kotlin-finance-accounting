@@ -1,7 +1,10 @@
-openapi: 3.0.4
+openapi: 3.0.3
 info:
   title: "Personal Financial Management Service"
   version: 1.0.0
+  contact:
+    name: Mikhail Sazonov
+    email: wursta@gmail.com
 servers:
   - url: http://localhost:8080/api
     description: 'Local'

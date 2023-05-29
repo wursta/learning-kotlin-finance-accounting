@@ -1,12 +1,17 @@
 package local.learning.app.biz
 
+import local.learning.app.biz.exception.UnexpectedContext
 import local.learning.app.biz.exception.UnknownExpenseCommand
 import local.learning.common.ExpenseContext
+import local.learning.common.IContext
 import local.learning.common.models.expense.ExpenseCommand
 import local.learning.stubs.ExpenseStub
 
-class ExpenseProcessor {
-    fun exec(ctx: ExpenseContext) {
+class ExpenseProcessor: IProcessor {
+    override fun exec(ctx: IContext) {
+        if (ctx !is ExpenseContext) {
+            throw UnexpectedContext()
+        }
         when (ctx.command) {
             ExpenseCommand.CREATE -> {
                 ctx.expenseResponse = ExpenseStub.get()

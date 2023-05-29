@@ -3,15 +3,24 @@ package local.kotlin.learning.fm.acceptance.rest
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.core.test.TestCaseSeverityLevel
 
-class CreateOutcomeRestAcceptance: BehaviorSpec({
+object ExpenseRoutes {
+    const val create = "api/expense/create"
+    const val read = "api/expense/read"
+    const val update = "api/expense/update"
+    const val delete = "api/expense/delete"
+    const val search = "api/expense/search"
+    const val stats = "api/expense/stats"
+}
+class ExpenseTest: BehaviorSpec({
     severity = TestCaseSeverityLevel.MINOR
 
-    given("Add new outcome with custom bank card or cash") {
-        `when`("Fill sum, date, choose card from added, choose category") {
-            then("Response is 200") {
-                TODO("Not realized")
-            }
-            then("Outcome saved") {
+    beforeEach {
+        //clearDb()
+    }
+
+    given("Create new expense") {
+        `when`("Fill correctly all required fields") {
+            then("Expense saved") {
                 TODO("Not realized")
             }
         }

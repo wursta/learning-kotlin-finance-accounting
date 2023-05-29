@@ -8,16 +8,15 @@ import local.learning.common.models.card.Card
 import local.learning.common.models.card.CardCommand
 
 data class CardContext(
-    // Context
-    var command: CardCommand = CardCommand.NONE,
-    var state: State = State.NONE,
-    val errors: MutableList<Error> = mutableListOf(),
-
     // Request
-    var requestId: RequestId = RequestId.NONE,
-    var timeStart: Instant = INSTANT_NONE,
+    override var requestId: RequestId = RequestId.NONE,
+    override var timeStart: Instant = INSTANT_NONE,
+    override var state: State = State.NONE,
+    override val errors: MutableList<Error> = mutableListOf(),
 
-    // Sources
+    var command: CardCommand = CardCommand.NONE,
+
+    // Requests & Responses
     var cardRequest: Card = Card(),
     var cardResponse: Card = Card(),
-)
+): IContext

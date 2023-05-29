@@ -97,3 +97,11 @@ internal fun SerializersModuleBuilder.setupPolymorphic() {
     contextual(requestSerializer)
     contextual(responseSerializer)
 }
+
+fun apiRequestSerialize(request: IRequestDto): String = jsonSerializer.encodeToString(request)
+@Suppress("UNCHECKED_CAST")
+fun <T : IRequestDto> apiRequestDeserialize(json: String): T = jsonSerializer.decodeFromString<IRequestDto>(json) as T
+fun apiResponseSerialize(response: IResponseDto): String = jsonSerializer.encodeToString(response)
+@Suppress("UNCHECKED_CAST")
+fun <T : IResponseDto> apiResponseDeserialize(json: String): T =
+    jsonSerializer.decodeFromString<IResponseDto>(json) as T

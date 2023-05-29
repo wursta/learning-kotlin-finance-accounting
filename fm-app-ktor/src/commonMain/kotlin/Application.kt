@@ -1,12 +1,12 @@
 package local.learning.app.ktor
 
-//import io.ktor.server.plugins.swagger.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -22,6 +22,14 @@ fun Application.mainModule(
     cardProcessor: CardProcessor = CardProcessor(),
     expenseProcessor: ExpenseProcessor = ExpenseProcessor()
 ) {
+    val swaggerHost = environment.config.propertyOrNull("ktor.swaggerHost")?.getString()
+    if (swaggerHost != null) {
+        install(CORS) {
+            allowHost(swaggerHost)
+            allowHeader(HttpHeaders.ContentType)
+        }
+    }
+
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             var message = cause.message
@@ -41,12 +49,6 @@ fun Application.mainModule(
     }
 
     routing {
-//        static("swagger") {
-//            files("resources/specs")
-//        }
-//        swaggerUI(path = "swagger", swaggerFile = "resources/specs/openapi.yaml")
-
-
         route("api") {
             install(ContentNegotiation) {
                 json(jsonSerializer)

@@ -22,6 +22,14 @@ application {
     mainClass.set("io.ktor.server.cio.EngineMain")
 }
 
+ktor {
+    docker {
+        localImageName.set(project.name)
+        imageTag.set(project.version.toString())
+        jreVersion.set(io.ktor.plugin.features.JreVersion.JRE_17)
+    }
+}
+
 jib {
     container.mainClass = "io.ktor.server.cio.EngineMain"
 }
@@ -41,9 +49,8 @@ kotlin {
                 implementation(ktor("cio"))
                 implementation(ktor("content-negotiation"))
                 implementation(ktor("json", "serialization-kotlinx"))
-
-                //implementation(ktor("swagger"))
                 implementation(ktor ("status-pages"))
+                implementation(ktor ("cors"))
 
                 // Project
                 implementation(project(":fm-api"))
@@ -67,8 +74,3 @@ kotlin {
         }
     }
 }
-
-//copy {
-//    from("./../specs/v1")
-//    into("./resources/specs")
-//}
