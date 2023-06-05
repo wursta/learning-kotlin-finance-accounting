@@ -3,28 +3,28 @@ package local.learning.app.ktor.routing
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import local.learning.api.models.*
-import local.learning.app.biz.ExpenseProcessor
+import local.learning.app.ktor.ApplicationSettings
 import local.learning.app.ktor.controller.expenseAction
 
-fun Route.expense(processor: ExpenseProcessor) {
+fun Route.expense(appSettings: ApplicationSettings) {
     route("expense") {
         post("create") {
-            call.expenseAction<ExpenseCreateRequestDto>(processor)
+            call.expenseAction<ExpenseCreateRequestDto>(appSettings)
         }
         post("read") {
-            call.expenseAction<ExpenseReadRequestDto>(processor)
+            call.expenseAction<ExpenseReadRequestDto>(appSettings)
         }
         post("update") {
-            call.expenseAction<ExpenseUpdateRequestDto>(processor)
+            call.expenseAction<ExpenseUpdateRequestDto>(appSettings)
         }
         post("delete") {
-            call.expenseAction<ExpenseDeleteRequestDto>(processor)
+            call.expenseAction<ExpenseDeleteRequestDto>(appSettings)
         }
         post("search") {
-            call.expenseAction<ExpenseSearchRequestDto>(processor)
+            call.expenseAction<ExpenseSearchRequestDto>(appSettings)
         }
         post("stats") {
-            call.expenseAction<ExpenseStatsRequestDto>(processor)
+            call.expenseAction<ExpenseStatsRequestDto>(appSettings)
         }
     }
 }

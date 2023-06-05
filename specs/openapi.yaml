@@ -342,6 +342,57 @@ components:
         message:
           type: string
 
+    # LOGS
+    ErrorLogModel:
+      title: Модель лога для ошибки
+      type: object
+      properties:
+        message:
+          type: string
+        field:
+          type: string
+        code:
+          type: string
+        level:
+          type: string
+
+    CommonCardLogModel:
+      title: Общая модель лога
+      description: Общая модель лога для банковских карт
+      type: object
+      properties:
+        messageTime:
+          type: string
+        logId:
+          type: string
+        source:
+          type: string
+        card:
+          $ref: '#/components/schemas/CardLogModel'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorLogModel'
+
+    CardLogModel:
+      title: Модель лога для банковской карты
+      type: object
+      properties:
+        requestId:
+          type: string
+        operation:
+          type: string
+          enum:
+            - cardCreate
+            - cardRead
+            - cardUpdate
+            - cardDelete
+        requestCard:
+          $ref: './schemas/Card.yaml#/CardObject'
+        responseCard:
+          $ref: './schemas/Card.yaml#/CardObject'
+
+    # REQUESTS & RESPONSES
     # CardCreate
     CardCreateRequest:
       allOf:

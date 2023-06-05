@@ -29,7 +29,7 @@ CardCreateObject:
 
 CardObject:
   type: object
-  description: Объект описывает свойства для обновления банковской карты
+  description: Объект описывает свойства банковской карты
   properties:
     guid:
       $ref: './Card.yaml#/CardGUID'

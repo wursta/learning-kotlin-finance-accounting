@@ -11,6 +11,15 @@ services:
     ports:
       - "8080:8080"
 
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./../specs/:/usr/share/nginx/html/doc
+    environment:
+      API_URL: doc/openapi.yaml
+
 #  nginx:
 #    image: nginx:latest
 #    ports:
