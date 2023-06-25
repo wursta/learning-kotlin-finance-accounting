@@ -102,14 +102,13 @@ private fun List<ExpenseSummaryByCategory>.toExpensesSummaryByCategoryTransport(
     .toList()
     .takeIf { it.isNotEmpty() }
 
-private fun List<Error>.toTransportErrors(): List<ResponseErrorDto>? = this
+private fun List<Error>.toTransportErrors(): List<ResponseErrorDto> = this
     .map { it.toTransport() }
     .toList()
-    .takeIf { it.isNotEmpty() }
 
 private fun Error.toTransport() = ResponseErrorDto(
-    code = code.takeIf { it.isNotBlank() },
-    group = group.takeIf { it.isNotBlank() },
+    code = code.toString().lowercase(),
+    group = group.toString().lowercase(),
     field = field.takeIf { it.isNotBlank() },
     message = message.takeIf { it.isNotBlank() },
 )

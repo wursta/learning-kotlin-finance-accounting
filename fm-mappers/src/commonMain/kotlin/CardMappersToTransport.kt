@@ -3,6 +3,7 @@ package local.learning.mappers
 import local.learning.api.models.*
 import local.learning.common.CardContext
 import local.learning.common.models.Error
+import local.learning.common.models.State
 import local.learning.common.models.card.Card
 import local.learning.common.models.card.CardCommand
 import local.learning.common.models.card.CardGuid
@@ -19,7 +20,7 @@ fun CardContext.toTransport(): IResponseDto = when(val cmd = command) {
 fun CardContext.toTransportCreate() = CardCreateResponseDto(
     responseType = "cardCreate",
     requestId = this.requestId.asString().takeIf { it.isNotBlank() },
-    result = ResponseResultDto.SUCCESS,
+    result = if (state == State.FAILING) ResponseResultDto.ERROR else ResponseResultDto.SUCCESS,
     errors = errors.toTransportErrors(),
     card = cardResponse.toTransport()
 )
@@ -27,7 +28,7 @@ fun CardContext.toTransportCreate() = CardCreateResponseDto(
 fun CardContext.toTransportRead() = CardReadResponseDto(
     responseType = "cardRead",
     requestId = this.requestId.asString().takeIf { it.isNotBlank() },
-    result = ResponseResultDto.SUCCESS,
+    result = if (state == State.FAILING) ResponseResultDto.ERROR else ResponseResultDto.SUCCESS,
     errors = errors.toTransportErrors(),
     card = cardResponse.toTransport()
 )
@@ -35,7 +36,7 @@ fun CardContext.toTransportRead() = CardReadResponseDto(
 fun CardContext.toTransportUpdate() = CardUpdateResponseDto(
     responseType = "cardUpdate",
     requestId = this.requestId.asString().takeIf { it.isNotBlank() },
-    result = ResponseResultDto.SUCCESS,
+    result = if (state == State.FAILING) ResponseResultDto.ERROR else ResponseResultDto.SUCCESS,
     errors = errors.toTransportErrors(),
     card = cardResponse.toTransport()
 )
@@ -43,7 +44,7 @@ fun CardContext.toTransportUpdate() = CardUpdateResponseDto(
 fun CardContext.toTransportDelete() = CardDeleteResponseDto(
     responseType = "cardDelete",
     requestId = this.requestId.asString().takeIf { it.isNotBlank() },
-    result = ResponseResultDto.SUCCESS,
+    result = if (state == State.FAILING) ResponseResultDto.ERROR else ResponseResultDto.SUCCESS,
     errors = errors.toTransportErrors(),
     card = cardResponse.toTransport()
 )
@@ -58,14 +59,13 @@ private fun Card.toTransport(): CardObjectDto = CardObjectDto(
     )
 )
 
-private fun List<Error>.toTransportErrors(): List<ResponseErrorDto>? = this
+private fun List<Error>.toTransportErrors(): List<ResponseErrorDto> = this
     .map { it.toTransport() }
     .toList()
-    .takeIf { it.isNotEmpty() }
 
 private fun Error.toTransport() = ResponseErrorDto(
-    code = code.takeIf { it.isNotBlank() },
-    group = group.takeIf { it.isNotBlank() },
+    code = code.toString().lowercase(),
+    group = group.toString().lowercase(),
     field = field.takeIf { it.isNotBlank() },
     message = message.takeIf { it.isNotBlank() },
 )

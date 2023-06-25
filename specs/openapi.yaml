@@ -342,6 +342,51 @@ components:
         message:
           type: string
 
+    # STUBS
+    CardRequestWorkMode:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum:
+            - prod
+            - test
+            - stub
+        stubCase:
+          type: string
+          description: Возможные стабы
+          enum:
+            - success
+            - bad_guid
+            - bad_number
+            - bad_valid_for
+            - bad_owner
+            - bad_bank_guid
+            -
+    ExpenseRequestWorkMode:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum:
+            - prod
+            - test
+            - stub
+        stubCase:
+          type: string
+          description: Возможные стабы
+          enum:
+            - success
+            - bad_guid
+            - bad_amount
+            - bad_card_guid
+            - bad_category_guid
+            - bad_search_filter_amount_from
+            - bad_search_filter_amount_to
+            - bad_search_filter_sources
+            - bad_statistic_filter_date_from
+            - bad_statistic_filter_date_to
+
     # LOGS
     ErrorLogModel:
       title: Модель лога для ошибки
@@ -399,6 +444,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/CardRequestWorkMode'
             card:
               $ref: './schemas/Card.yaml#/CardCreateObject'
 
@@ -413,6 +460,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/CardRequestWorkMode'
             guid:
               $ref: './schemas/Card.yaml#/CardGUID'
 
@@ -427,6 +476,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/CardRequestWorkMode'
             card:
               $ref: './schemas/Card.yaml#/CardObject'
 
@@ -441,6 +492,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/CardRequestWorkMode'
             guid:
               $ref: './schemas/Card.yaml#/CardGUID'
 
@@ -455,6 +508,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/ExpenseRequestWorkMode'
             expense:
               $ref: './schemas/Expense.yaml#/ExpenseCreateObject'
 
@@ -469,6 +524,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/ExpenseRequestWorkMode'
             guid:
               $ref: './schemas/Expense.yaml#/ExpenseGUID'
 
@@ -483,6 +540,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/ExpenseRequestWorkMode'
             expense:
               $ref: './schemas/Expense.yaml#/ExpenseObject'
 
@@ -497,6 +556,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/ExpenseRequestWorkMode'
             guid:
               $ref: './schemas/Expense.yaml#/ExpenseGUID'
 
@@ -510,6 +571,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/IRequest'
         - $ref: './schemas/Expense.yaml#/ExpenseFilter'
+        - type: object
+          properties:
+            workMode:
+              $ref: '#/components/schemas/ExpenseRequestWorkMode'
 
     ExpenseSearchResponse:
       allOf:
@@ -521,6 +586,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/IRequest'
         - $ref: './schemas/Expense.yaml#/ExpenseStatFilter'
+        - type: object
+          properties:
+            workMode:
+              $ref: '#/components/schemas/ExpenseRequestWorkMode'
 
     ExpenseStatsResponse:
       allOf:

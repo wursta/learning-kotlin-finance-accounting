@@ -12,7 +12,6 @@ import local.learning.common.models.card.Card
 import local.learning.stubs.CardStub
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 class CardStubTest {
     private val cardStub: Card = CardStub.get()
@@ -22,6 +21,10 @@ class CardStubTest {
             val requestObj = CardCreateRequestDto(
                 requestId = "uniqueRequestId",
                 requestType = "cardCreate",
+                workMode = CardRequestWorkModeDto(
+                    mode = CardRequestWorkModeDto.Mode.STUB,
+                    stubCase = CardRequestWorkModeDto.StubCase.SUCCESS
+                ),
                 card = CardCreateObjectDto(
                     number = cardStub.number,
                     validFor = cardStub.validFor,
@@ -38,7 +41,7 @@ class CardStubTest {
         assertEquals(200, response.status.value)
         assertEquals("cardCreate", responseObj.responseType)
         assertEquals(ResponseResultDto.SUCCESS, responseObj.result)
-        assertNull(responseObj.errors)
+        assertEquals(0, responseObj.errors?.size)
         assertEquals(cardStub.guid.asString(), responseObj.card?.guid)
         assertEquals(cardStub.number, responseObj.card?.number)
         assertEquals(cardStub.validFor, responseObj.card?.validFor)
@@ -52,6 +55,10 @@ class CardStubTest {
             val requestObj = CardReadRequestDto(
                 requestId = "uniqueRequestId",
                 requestType = "cardRead",
+                workMode = CardRequestWorkModeDto(
+                    mode = CardRequestWorkModeDto.Mode.STUB,
+                    stubCase = CardRequestWorkModeDto.StubCase.SUCCESS
+                ),
                 guid = cardStub.guid.asString()
             )
             contentType(ContentType.Application.Json)
@@ -63,7 +70,7 @@ class CardStubTest {
         assertEquals(200, response.status.value)
         assertEquals("cardRead", responseObj.responseType)
         assertEquals(ResponseResultDto.SUCCESS, responseObj.result)
-        assertNull(responseObj.errors)
+        assertEquals(0, responseObj.errors?.size)
         assertEquals(cardStub.guid.asString(), responseObj.card?.guid)
         assertEquals(cardStub.number, responseObj.card?.number)
         assertEquals(cardStub.validFor, responseObj.card?.validFor)
@@ -77,6 +84,10 @@ class CardStubTest {
             val requestObj = CardUpdateRequestDto(
                 requestId = "uniqueRequestId",
                 requestType = "cardCreate",
+                workMode = CardRequestWorkModeDto(
+                    mode = CardRequestWorkModeDto.Mode.STUB,
+                    stubCase = CardRequestWorkModeDto.StubCase.SUCCESS
+                ),
                 card = CardObjectDto(
                     guid = cardStub.guid.asString(),
                     number = cardStub.number,
@@ -96,7 +107,7 @@ class CardStubTest {
         assertEquals(200, response.status.value)
         assertEquals("cardUpdate", responseObj.responseType)
         assertEquals(ResponseResultDto.SUCCESS, responseObj.result)
-        assertNull(responseObj.errors)
+        assertEquals(0, responseObj.errors?.size)
         assertEquals(cardStub.guid.asString(), responseObj.card?.guid)
         assertEquals(cardStub.number, responseObj.card?.number)
         assertEquals(cardStub.validFor, responseObj.card?.validFor)
@@ -110,6 +121,10 @@ class CardStubTest {
             val requestObj = CardDeleteRequestDto(
                 requestId = "uniqueRequestId",
                 requestType = "cardCreate",
+                workMode = CardRequestWorkModeDto(
+                    mode = CardRequestWorkModeDto.Mode.STUB,
+                    stubCase = CardRequestWorkModeDto.StubCase.SUCCESS
+                ),
                 guid = cardStub.guid.asString()
             )
             contentType(ContentType.Application.Json)
@@ -121,7 +136,7 @@ class CardStubTest {
         assertEquals(200, response.status.value)
         assertEquals("cardDelete", responseObj.responseType)
         assertEquals(ResponseResultDto.SUCCESS, responseObj.result)
-        assertNull(responseObj.errors)
+        assertEquals(0, responseObj.errors?.size)
         assertEquals(cardStub.guid.asString(), responseObj.card?.guid)
         assertEquals(cardStub.number, responseObj.card?.number)
         assertEquals(cardStub.validFor, responseObj.card?.validFor)

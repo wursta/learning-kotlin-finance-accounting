@@ -14,7 +14,6 @@ import local.learning.stubs.ExpenseStub
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 class ExpenseStubTest {
     private val expenseStub: Expense = ExpenseStub.get()
@@ -26,6 +25,10 @@ class ExpenseStubTest {
             val requestObj = ExpenseCreateRequestDto(
                 requestId = "uniqueRequestId",
                 requestType = "expenseCreate",
+                workMode = ExpenseRequestWorkModeDto(
+                    mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                    stubCase = ExpenseRequestWorkModeDto.StubCase.SUCCESS
+                ),
                 expense = ExpenseCreateObjectDto(
                     amount = expenseStub.amount.toDouble(),
                     card = expenseStub.cardGuid.asString(),
@@ -41,7 +44,7 @@ class ExpenseStubTest {
         assertEquals(200, response.status.value)
         assertEquals("expenseCreate", responseObj.responseType)
         assertEquals(ResponseResultDto.SUCCESS, responseObj.result)
-        assertNull(responseObj.errors)
+        assertEquals(0, responseObj.errors?.size)
         assertEquals(expenseStub.guid.asString(), responseObj.expense?.guid)
         assertEquals(expenseStub.amount.toDouble(), responseObj.expense?.amount)
         assertEquals(expenseStub.cardGuid.asString(), responseObj.expense?.card)
@@ -54,6 +57,10 @@ class ExpenseStubTest {
             val requestObj = ExpenseReadRequestDto(
                 requestId = "uniqueRequestId",
                 requestType = "expenseRead",
+                workMode = ExpenseRequestWorkModeDto(
+                    mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                    stubCase = ExpenseRequestWorkModeDto.StubCase.SUCCESS
+                ),
                 guid = expenseStub.guid.asString()
             )
             contentType(ContentType.Application.Json)
@@ -65,7 +72,7 @@ class ExpenseStubTest {
         assertEquals(200, response.status.value)
         assertEquals("expenseRead", responseObj.responseType)
         assertEquals(ResponseResultDto.SUCCESS, responseObj.result)
-        assertNull(responseObj.errors)
+        assertEquals(0, responseObj.errors?.size)
         assertEquals(expenseStub.guid.asString(), responseObj.expense?.guid)
         assertEquals(expenseStub.amount.toDouble(), responseObj.expense?.amount)
         assertEquals(expenseStub.cardGuid.asString(), responseObj.expense?.card)
@@ -78,6 +85,10 @@ class ExpenseStubTest {
             val requestObj = ExpenseUpdateRequestDto(
                 requestId = "uniqueRequestId",
                 requestType = "expenseUpdate",
+                workMode = ExpenseRequestWorkModeDto(
+                    mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                    stubCase = ExpenseRequestWorkModeDto.StubCase.SUCCESS
+                ),
                 expense = ExpenseObjectDto(
                     guid = expenseStub.guid.asString(),
                     amount = expenseStub.amount.toDouble(),
@@ -94,7 +105,7 @@ class ExpenseStubTest {
         assertEquals(200, response.status.value)
         assertEquals("expenseUpdate", responseObj.responseType)
         assertEquals(ResponseResultDto.SUCCESS, responseObj.result)
-        assertNull(responseObj.errors)
+        assertEquals(0, responseObj.errors?.size)
         assertEquals(expenseStub.guid.asString(), responseObj.expense?.guid)
         assertEquals(expenseStub.amount.toDouble(), responseObj.expense?.amount)
         assertEquals(expenseStub.cardGuid.asString(), responseObj.expense?.card)
@@ -107,6 +118,10 @@ class ExpenseStubTest {
             val requestObj = ExpenseDeleteRequestDto(
                 requestId = "uniqueRequestId",
                 requestType = "expenseDelete",
+                workMode = ExpenseRequestWorkModeDto(
+                    mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                    stubCase = ExpenseRequestWorkModeDto.StubCase.SUCCESS
+                ),
                 guid = expenseStub.guid.asString()
             )
             contentType(ContentType.Application.Json)
@@ -118,7 +133,7 @@ class ExpenseStubTest {
         assertEquals(200, response.status.value)
         assertEquals("expenseDelete", responseObj.responseType)
         assertEquals(ResponseResultDto.SUCCESS, responseObj.result)
-        assertNull(responseObj.errors)
+        assertEquals(0, responseObj.errors?.size)
         assertEquals(expenseStub.guid.asString(), responseObj.expense?.guid)
         assertEquals(expenseStub.amount.toDouble(), responseObj.expense?.amount)
         assertEquals(expenseStub.cardGuid.asString(), responseObj.expense?.card)
@@ -131,6 +146,10 @@ class ExpenseStubTest {
             val requestObj = ExpenseSearchRequestDto(
                 requestId = "uniqueRequestId",
                 requestType = "expensesSearch",
+                workMode = ExpenseRequestWorkModeDto(
+                    mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                    stubCase = ExpenseRequestWorkModeDto.StubCase.SUCCESS
+                ),
                 amountFrom = 100.00
             )
             contentType(ContentType.Application.Json)
@@ -142,7 +161,7 @@ class ExpenseStubTest {
         assertEquals(200, response.status.value)
         assertEquals("expensesSearch", responseObj.responseType)
         assertEquals(ResponseResultDto.SUCCESS, responseObj.result)
-        assertNull(responseObj.errors)
+        assertEquals(0, responseObj.errors?.size)
         assertNotNull(responseObj.expenses)
         assertEquals(expensesListStub.size, responseObj.expenses?.size)
 
@@ -160,7 +179,11 @@ class ExpenseStubTest {
         val response = client.post("/api/expense/stats") {
             val requestObj = ExpenseStatsRequestDto(
                 requestId = "uniqueRequestId",
-                requestType = "expensesStats"
+                requestType = "expensesStats",
+                workMode = ExpenseRequestWorkModeDto(
+                    mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                    stubCase = ExpenseRequestWorkModeDto.StubCase.SUCCESS
+                ),
             )
             contentType(ContentType.Application.Json)
             val requestJson = jsonSerializer.encodeToString(requestObj)
@@ -171,7 +194,7 @@ class ExpenseStubTest {
         assertEquals(200, response.status.value)
         assertEquals("expensesStats", responseObj.responseType)
         assertEquals(ResponseResultDto.SUCCESS, responseObj.result)
-        assertNull(responseObj.errors)
+        assertEquals(0, responseObj.errors?.size)
         assertEquals(expensesStatsStub.total.toDouble(), responseObj.total)
         assertNotNull(responseObj.summary)
         assertEquals(expensesStatsStub.summaryByCategory.size, responseObj.summary?.size)

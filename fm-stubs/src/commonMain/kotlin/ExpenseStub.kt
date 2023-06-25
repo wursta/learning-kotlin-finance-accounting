@@ -1,6 +1,6 @@
 package local.learning.stubs
 
-import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import local.learning.common.models.card.CardGuid
 import local.learning.common.models.category.Category
 import local.learning.common.models.category.CategoryGuid
@@ -61,7 +61,7 @@ object ExpenseStub {
     )
     private fun makeExpense(guid: ExpenseGuid, amount: BigDecimal, cardGuid: CardGuid, categoryGuid: CategoryGuid) = Expense(
         guid = guid,
-        createDT = Clock.System.now(),
+        createDT = Instant.parse("2023-01-01T14:46:04Z"),
         amount = amount,
         cardGuid = cardGuid,
         categoryGuid = categoryGuid

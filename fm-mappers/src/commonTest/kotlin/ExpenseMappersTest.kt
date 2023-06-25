@@ -7,8 +7,11 @@ import kotlinx.datetime.toLocalDateTime
 import local.learning.api.models.*
 import local.learning.common.ExpenseContext
 import local.learning.common.INSTANT_POSITIVE_INFINITY
+import local.learning.common.errors.ErrorCode
+import local.learning.common.errors.ErrorGroup
 import local.learning.common.models.Error
 import local.learning.common.models.RequestId
+import local.learning.common.models.WorkMode
 import local.learning.common.models.card.CardGuid
 import local.learning.common.models.category.Category
 import local.learning.common.models.category.CategoryGuid
@@ -22,6 +25,9 @@ class ExpenseMappersTest {
     fun fromExpenseCreateRequestTransport() {
         val req = ExpenseCreateRequestDto(
             requestId = "uniqueRequestId",
+            workMode = ExpenseRequestWorkModeDto(
+                mode = ExpenseRequestWorkModeDto.Mode.PROD
+            ),
             expense = ExpenseCreateObjectDto(
                 createDt = "2023-01-01T14:46:04Z",
                 amount = 540.4,
@@ -34,6 +40,7 @@ class ExpenseMappersTest {
         context.fromTransport(req)
 
         assertEquals(ExpenseCommand.CREATE, context.command)
+        assertEquals(WorkMode.PROD, context.workMode)
         assertEquals(Instant.parse("2023-01-01T14:46:04Z"), context.expenseRequest.createDT)
         assertEquals(BigDecimal(540.4), context.expenseRequest.amount)
         assertEquals(CardGuid("1598044e-5259-11e9-8647-d663bd873d93"), context.expenseRequest.cardGuid)
@@ -54,8 +61,8 @@ class ExpenseMappersTest {
             ),
             errors = mutableListOf(
                 Error(
-                    code = "err",
-                    group = "request",
+                    code = ErrorCode.INVALID_FIELD_FORMAT,
+                    group = ErrorGroup.VALIDATION,
                     field = "amount",
                     message = "wrong amount",
                 )
@@ -71,8 +78,8 @@ class ExpenseMappersTest {
         assertEquals("5410bdaf-834a-4ca6-9044-ee25d5a7164c", req.expense?.category)
 
         assertEquals(1, req.errors?.size)
-        assertEquals("err", req.errors?.firstOrNull()?.code)
-        assertEquals("request", req.errors?.firstOrNull()?.group)
+        assertEquals("invalid_field_format", req.errors?.firstOrNull()?.code)
+        assertEquals("validation", req.errors?.firstOrNull()?.group)
         assertEquals("amount", req.errors?.firstOrNull()?.field)
         assertEquals("wrong amount", req.errors?.firstOrNull()?.message)
     }
@@ -81,6 +88,9 @@ class ExpenseMappersTest {
     fun fromExpenseReadRequestTransport() {
         val req = ExpenseReadRequestDto(
             requestId = "uniqueRequestId",
+            workMode = ExpenseRequestWorkModeDto(
+                mode = ExpenseRequestWorkModeDto.Mode.TEST
+            ),
             guid = "4001a513-8dc8-4b32-844c-76be5c0a67a3"
         )
 
@@ -88,6 +98,7 @@ class ExpenseMappersTest {
         context.fromTransport(req)
 
         assertEquals(ExpenseCommand.READ, context.command)
+        assertEquals(WorkMode.TEST, context.workMode)
         assertEquals(ExpenseGuid("4001a513-8dc8-4b32-844c-76be5c0a67a3"), context.expenseRequest.guid)
     }
     @Test
@@ -117,6 +128,10 @@ class ExpenseMappersTest {
     fun fromExpenseUpdateRequestTransport() {
         val req = ExpenseUpdateRequestDto(
             requestId = "uniqueRequestId",
+            workMode = ExpenseRequestWorkModeDto(
+                mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                stubCase = ExpenseRequestWorkModeDto.StubCase.SUCCESS
+            ),
             expense = ExpenseObjectDto(
                 guid = "bbd74256-e582-4e1c-aa19-a05cac64c589",
                 createDt = "2023-01-01T14:46:04Z",
@@ -130,6 +145,8 @@ class ExpenseMappersTest {
         context.fromTransport(req)
 
         assertEquals(ExpenseCommand.UPDATE, context.command)
+        assertEquals(WorkMode.STUB, context.workMode)
+        assertEquals(ExpenseStubCase.SUCCESS, context.stubCase)
         assertEquals(ExpenseGuid("bbd74256-e582-4e1c-aa19-a05cac64c589"), context.expenseRequest.guid)
         assertEquals(Instant.parse("2023-01-01T14:46:04Z"), context.expenseRequest.createDT)
         assertEquals(BigDecimal(540.4), context.expenseRequest.amount)
@@ -164,6 +181,9 @@ class ExpenseMappersTest {
     fun fromExpenseDeleteRequestTransport() {
         val req = ExpenseDeleteRequestDto(
             requestId = "uniqueRequestId",
+            workMode = ExpenseRequestWorkModeDto(
+                mode = ExpenseRequestWorkModeDto.Mode.PROD
+            ),
             guid = "bbd74256-e582-4e1c-aa19-a05cac64c589"
         )
 
@@ -171,6 +191,7 @@ class ExpenseMappersTest {
         context.fromTransport(req)
 
         assertEquals(ExpenseCommand.DELETE, context.command)
+        assertEquals(WorkMode.PROD, context.workMode)
         assertEquals(ExpenseGuid("bbd74256-e582-4e1c-aa19-a05cac64c589"), context.expenseRequest.guid)
     }
     @Test
@@ -201,6 +222,9 @@ class ExpenseMappersTest {
     fun fromExpenseSearchRequestTransport() {
         val req = ExpenseSearchRequestDto(
             requestId = "uniqueRequestId",
+            workMode = ExpenseRequestWorkModeDto(
+                mode = ExpenseRequestWorkModeDto.Mode.PROD
+            ),
             amountFrom = 100.0,
             dateFrom = "2023-01-01T14:46:04Z",
             cards = mutableListOf("1598044e-5259-11e9-8647-d663bd873d93", "66c9ee23-87ca-4104-b1fd-67acb650a595")
@@ -210,6 +234,7 @@ class ExpenseMappersTest {
         context.fromTransport(req)
 
         assertEquals(ExpenseCommand.SEARCH, context.command)
+        assertEquals(WorkMode.PROD, context.workMode)
         assertEquals(BigDecimal(100), context.expenseSearchRequest.amountFrom)
         assertEquals(BigDecimal(-1), context.expenseSearchRequest.amountTo)
         assertEquals(Instant.parse("2023-01-01T14:46:04Z"), context.expenseSearchRequest.dateFrom)
@@ -264,6 +289,9 @@ class ExpenseMappersTest {
     fun fromExpenseStatsRequestTransport() {
         val req = ExpenseStatsRequestDto(
             requestId = "uniqueRequestId",
+            workMode = ExpenseRequestWorkModeDto(
+                mode = ExpenseRequestWorkModeDto.Mode.PROD
+            ),
             dateFrom = "2023-01-01T14:46:04Z"
         )
 
@@ -271,6 +299,7 @@ class ExpenseMappersTest {
         context.fromTransport(req)
 
         assertEquals(ExpenseCommand.STATS, context.command)
+        assertEquals(WorkMode.PROD, context.workMode)
         assertEquals(Instant.parse("2023-01-01T14:46:04Z"), context.expenseStatisticRequest.dateFrom)
         assertEquals(INSTANT_POSITIVE_INFINITY, context.expenseStatisticRequest.dateTo)
     }

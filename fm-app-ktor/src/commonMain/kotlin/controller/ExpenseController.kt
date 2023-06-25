@@ -7,33 +7,26 @@ import io.ktor.server.response.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import local.learning.api.models.IRequestDto
-import local.learning.api.models.InternalErrorResponseDto
 import local.learning.api.serialization.utils.jsonSerializer
 import local.learning.app.ktor.ApplicationSettings
-import local.learning.common.ExpenseContext
+import local.learning.common.models.expense.ExpenseCommand
 import local.learning.mappers.fromTransport
 import local.learning.mappers.toTransport
 
-suspend inline fun <reified T : IRequestDto> ApplicationCall.expenseAction(appSettings: ApplicationSettings) {
-    val logId = T::class.qualifiedName ?: "unknown"
-    val logger = appSettings.corSettings.loggerProvider.logger(T::class)
-    try {
-        logger.doWithLogging(logId) {
+suspend inline fun <reified T : IRequestDto> ApplicationCall.expenseAction(
+    appSettings: ApplicationSettings,
+    realCommand: ExpenseCommand
+) {
+    appSettings.expenseProcessor.process(
+        logger = appSettings.corSettings.loggerProvider.logger(T::class),
+        logId = T::class.qualifiedName ?: "unknown",
+        command = realCommand,
+        {
             val request = jsonSerializer.decodeFromString<T>(receiveText())
-            val context = ExpenseContext()
-            context.fromTransport(request)
-            appSettings.expenseProcessor.exec(context)
-            respondText(jsonSerializer.encodeToString(context.toTransport()), ContentType.Application.Json)
+            it.fromTransport(request)
+        },
+        {
+            respondText(jsonSerializer.encodeToString(it.toTransport()), ContentType.Application.Json)
         }
-    } catch (e: Throwable) {
-        respondText(
-            text = jsonSerializer.encodeToString(
-                InternalErrorResponseDto(
-                    message = e.message
-                )
-            ),
-            contentType = ContentType.Application.Json,
-            status = HttpStatusCode.InternalServerError
-        )
-    }
+    )
 }
