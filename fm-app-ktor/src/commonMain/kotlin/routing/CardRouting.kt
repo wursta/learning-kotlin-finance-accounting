@@ -6,22 +6,23 @@ import local.learning.api.models.CardCreateRequestDto
 import local.learning.api.models.CardDeleteRequestDto
 import local.learning.api.models.CardReadRequestDto
 import local.learning.api.models.CardUpdateRequestDto
-import local.learning.app.biz.CardProcessor
+import local.learning.app.ktor.ApplicationSettings
 import local.learning.app.ktor.controller.cardAction
+import local.learning.common.models.card.CardCommand
 
-fun Route.card(processor: CardProcessor) {
+fun Route.card(appSettings: ApplicationSettings) {
     route("card") {
         post("create") {
-            call.cardAction<CardCreateRequestDto>(processor)
+            call.cardAction<CardCreateRequestDto>(appSettings, CardCommand.CREATE)
         }
         post("read") {
-            call.cardAction<CardReadRequestDto>(processor)
+            call.cardAction<CardReadRequestDto>(appSettings, CardCommand.READ)
         }
         post("update") {
-            call.cardAction<CardUpdateRequestDto>(processor)
+            call.cardAction<CardUpdateRequestDto>(appSettings, CardCommand.UPDATE)
         }
         post("delete") {
-            call.cardAction<CardDeleteRequestDto>(processor)
+            call.cardAction<CardDeleteRequestDto>(appSettings, CardCommand.DELETE)
         }
     }
 }

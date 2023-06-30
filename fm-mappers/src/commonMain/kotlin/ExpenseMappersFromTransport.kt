@@ -6,15 +6,11 @@ import local.learning.common.ExpenseContext
 import local.learning.common.INSTANT_NEGATIVE_INFINITY
 import local.learning.common.INSTANT_NONE
 import local.learning.common.INSTANT_POSITIVE_INFINITY
-import local.learning.common.helpers.isAmountValid
-import local.learning.common.helpers.isCardGuidValid
-import local.learning.common.helpers.isCategoryGuidValid
-import local.learning.common.helpers.isGuidValid
 import local.learning.common.models.RequestId
+import local.learning.common.models.WorkMode
 import local.learning.common.models.card.CardGuid
 import local.learning.common.models.category.CategoryGuid
 import local.learning.common.models.expense.*
-import local.learning.mappers.exceptions.InvalidFieldFormat
 import local.learning.mappers.exceptions.UnknownRequestClass
 import java.math.BigDecimal
 
@@ -41,30 +37,40 @@ fun ExpenseContext.fromTransport(request: IRequestDto) = when (request) {
 
 fun ExpenseContext.fromTransport(request: ExpenseCreateRequestDto) {
     requestId = request.requestId()
+    workMode = request.workMode?.toInternalWorkMode() ?: WorkMode.PROD
+    stubCase = request.workMode?.toInternalStubCase() ?: ExpenseStubCase.NONE
     command = ExpenseCommand.CREATE
     expenseRequest = request.expense?.toInternal() ?: Expense()
 }
 
 fun ExpenseContext.fromTransport(request: ExpenseReadRequestDto) {
     requestId = request.requestId()
+    workMode = request.workMode?.toInternalWorkMode() ?: WorkMode.PROD
+    stubCase = request.workMode?.toInternalStubCase() ?: ExpenseStubCase.NONE
     command = ExpenseCommand.READ
     expenseRequest = request.guid.toExpenseWithGuId()
 }
 
 fun ExpenseContext.fromTransport(request: ExpenseUpdateRequestDto) {
     requestId = request.requestId()
+    workMode = request.workMode?.toInternalWorkMode() ?: WorkMode.PROD
+    stubCase = request.workMode?.toInternalStubCase() ?: ExpenseStubCase.NONE
     command = ExpenseCommand.UPDATE
     expenseRequest = request.expense?.toInternal() ?: Expense()
 }
 
 fun ExpenseContext.fromTransport(request: ExpenseDeleteRequestDto) {
     requestId = request.requestId()
+    workMode = request.workMode?.toInternalWorkMode() ?: WorkMode.PROD
+    stubCase = request.workMode?.toInternalStubCase() ?: ExpenseStubCase.NONE
     command = ExpenseCommand.DELETE
     expenseRequest = request.guid.toExpenseWithGuId()
 }
 
 fun ExpenseContext.fromTransport(request: ExpenseSearchRequestDto) {
     requestId = request.requestId()
+    workMode = request.workMode?.toInternalWorkMode() ?: WorkMode.PROD
+    stubCase = request.workMode?.toInternalStubCase() ?: ExpenseStubCase.NONE
     command = ExpenseCommand.SEARCH
     expenseSearchRequest = ExpenseSearchFilter(
         amountFrom = request.amountFrom.takeIf { it != null }?.let { BigDecimal(it) } ?: BigDecimal.valueOf(-1),
@@ -77,11 +83,34 @@ fun ExpenseContext.fromTransport(request: ExpenseSearchRequestDto) {
 
 fun ExpenseContext.fromTransport(request: ExpenseStatsRequestDto) {
     requestId = request.requestId()
+    workMode = request.workMode?.toInternalWorkMode() ?: WorkMode.PROD
+    stubCase = request.workMode?.toInternalStubCase() ?: ExpenseStubCase.NONE
     command = ExpenseCommand.STATS
     expenseStatisticRequest = ExpenseStatisticFilter(
         dateFrom = request.dateFrom?.let { Instant.parse(it) } ?: INSTANT_NEGATIVE_INFINITY,
         dateTo = request.dateTo?.let { Instant.parse(it) } ?: INSTANT_POSITIVE_INFINITY,
     )
+}
+
+private fun ExpenseRequestWorkModeDto.toInternalWorkMode(): WorkMode = when(this.mode) {
+    ExpenseRequestWorkModeDto.Mode.PROD -> WorkMode.PROD
+    ExpenseRequestWorkModeDto.Mode.TEST -> WorkMode.TEST
+    ExpenseRequestWorkModeDto.Mode.STUB -> WorkMode.STUB
+    else -> WorkMode.PROD
+}
+
+private fun ExpenseRequestWorkModeDto.toInternalStubCase(): ExpenseStubCase = when(this.stubCase) {
+    ExpenseRequestWorkModeDto.StubCase.SUCCESS -> ExpenseStubCase.SUCCESS
+    ExpenseRequestWorkModeDto.StubCase.BAD_GUID -> ExpenseStubCase.VALIDATION_ERROR_BAD_GUID
+    ExpenseRequestWorkModeDto.StubCase.BAD_AMOUNT -> ExpenseStubCase.VALIDATION_ERROR_BAD_AMOUNT
+    ExpenseRequestWorkModeDto.StubCase.BAD_CARD_GUID -> ExpenseStubCase.VALIDATION_ERROR_BAD_CARD_GUID
+    ExpenseRequestWorkModeDto.StubCase.BAD_CATEGORY_GUID -> ExpenseStubCase.VALIDATION_ERROR_BAD_CATEGORY_GUID
+    ExpenseRequestWorkModeDto.StubCase.BAD_SEARCH_FILTER_AMOUNT_FROM -> ExpenseStubCase.VALIDATION_ERROR_BAD_SEARCH_FILTER_AMOUNT_FROM
+    ExpenseRequestWorkModeDto.StubCase.BAD_SEARCH_FILTER_AMOUNT_TO -> ExpenseStubCase.VALIDATION_ERROR_BAD_SEARCH_FILTER_AMOUNT_TO
+    ExpenseRequestWorkModeDto.StubCase.BAD_SEARCH_FILTER_SOURCES -> ExpenseStubCase.VALIDATION_ERROR_BAD_SEARCH_FILTER_SOURCES
+    ExpenseRequestWorkModeDto.StubCase.BAD_STATISTIC_FILTER_DATE_FROM -> ExpenseStubCase.VALIDATION_ERROR_BAD_STATISTIC_FILTER_DATE_FROM
+    ExpenseRequestWorkModeDto.StubCase.BAD_STATISTIC_FILTER_DATE_TO -> ExpenseStubCase.VALIDATION_ERROR_BAD_STATISTIC_FILTER_DATE_TO
+    else -> ExpenseStubCase.NONE
 }
 
 private fun ExpenseCreateObjectDto.toInternal(): Expense {
@@ -90,19 +119,7 @@ private fun ExpenseCreateObjectDto.toInternal(): Expense {
         amount = this.amount.takeIf { it != null }?.let { BigDecimal(it) } ?: BigDecimal.ZERO,
         cardGuid = this.card.toCardGuid(),
         categoryGuid = this.category.toCategoryGuid()
-    ).also {
-        if (!it.isAmountValid()) {
-            throw InvalidFieldFormat("amount", "Float >= 0")
-        }
-
-        if (!it.isCardGuidValid()) {
-            throw InvalidFieldFormat("card", "1598044e-5259-11e9-8647-d663bd873d93")
-        }
-
-        if (!it.isCategoryGuidValid()) {
-            throw InvalidFieldFormat("category", "1598044e-5259-11e9-8647-d663bd873d93")
-        }
-    }
+    )
 }
 
 private fun ExpenseObjectDto.toInternal(): Expense {
@@ -112,21 +129,5 @@ private fun ExpenseObjectDto.toInternal(): Expense {
         amount = this.amount.takeIf { it != null }?.let { BigDecimal(it) } ?: BigDecimal.ZERO,
         cardGuid = this.card.toCardGuid(),
         categoryGuid = this.category.toCategoryGuid()
-    ).also {
-        if (!it.isGuidValid()) {
-            throw InvalidFieldFormat("guid", "1598044e-5259-11e9-8647-d663bd873d93")
-        }
-
-        if (!it.isAmountValid()) {
-            throw InvalidFieldFormat("amount", "Float >= 0")
-        }
-
-        if (!it.isCardGuidValid()) {
-            throw InvalidFieldFormat("card", "1598044e-5259-11e9-8647-d663bd873d93")
-        }
-
-        if (!it.isCategoryGuidValid()) {
-            throw InvalidFieldFormat("category", "1598044e-5259-11e9-8647-d663bd873d93")
-        }
-    }
+    )
 }

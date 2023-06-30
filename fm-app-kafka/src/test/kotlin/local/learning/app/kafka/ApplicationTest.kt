@@ -42,6 +42,10 @@ class ApplicationTest {
                     "test-1",
                     apiRequestSerialize(CardCreateRequestDto(
                         requestId = "uniqueRequestId",
+                        workMode = CardRequestWorkModeDto(
+                            mode = CardRequestWorkModeDto.Mode.STUB,
+                            stubCase = CardRequestWorkModeDto.StubCase.SUCCESS
+                        ),
                         card = CardCreateObjectDto(
                             number = "5191891428863955",
                             validFor = "2023-04",
@@ -93,6 +97,10 @@ class ApplicationTest {
                     "test-1",
                     apiRequestSerialize(ExpenseCreateRequestDto(
                         requestId = "uniqueRequestId",
+                        workMode = ExpenseRequestWorkModeDto(
+                            mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                            stubCase = ExpenseRequestWorkModeDto.StubCase.SUCCESS
+                        ),
                         expense = ExpenseCreateObjectDto(
                             createDt = "2023-01-01T14:46:04Z",
                             amount = 540.4,

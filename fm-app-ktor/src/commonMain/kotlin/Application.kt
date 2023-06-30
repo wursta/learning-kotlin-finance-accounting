@@ -17,10 +17,20 @@ import local.learning.app.biz.CardProcessor
 import local.learning.app.biz.ExpenseProcessor
 import local.learning.app.ktor.routing.card
 import local.learning.app.ktor.routing.expense
+import local.learning.common.CorSettings
+import local.learning.common.log.LoggerProvider
+
+expect fun Application.getLoggerProviderConf(): LoggerProvider
+fun Application.initAppSettings(): ApplicationSettings = ApplicationSettings(
+    corSettings = CorSettings(
+        loggerProvider = getLoggerProviderConf()
+    ),
+    cardProcessor = CardProcessor(),
+    expenseProcessor = ExpenseProcessor(),
+)
 
 fun Application.mainModule(
-    cardProcessor: CardProcessor = CardProcessor(),
-    expenseProcessor: ExpenseProcessor = ExpenseProcessor()
+    appSettings: ApplicationSettings = initAppSettings()
 ) {
     val swaggerHost = environment.config.propertyOrNull("ktor.swaggerHost")?.getString()
     if (swaggerHost != null) {
@@ -54,8 +64,8 @@ fun Application.mainModule(
                 json(jsonSerializer)
             }
 
-            card(cardProcessor)
-            expense(expenseProcessor)
+            card(appSettings)
+            expense(appSettings)
         }
     }
 }

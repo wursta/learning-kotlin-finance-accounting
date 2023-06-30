@@ -14,6 +14,10 @@ class CardRequestSerializationTest {
     private val createRequest: IRequestDto = CardCreateRequestDto(
         requestType = "cardCreate",
         requestId = "db630ffa-85e2-4cb0-9c15-23f662e36685",
+        workMode = CardRequestWorkModeDto(
+            mode = CardRequestWorkModeDto.Mode.STUB,
+            stubCase = CardRequestWorkModeDto.StubCase.SUCCESS
+        ),
         card = CardCreateObjectDto(
             number = "5191891428863955",
             validFor = "2026-04",
@@ -25,12 +29,20 @@ class CardRequestSerializationTest {
     private val readRequest: IRequestDto = CardReadRequestDto(
         requestType = "cardRead",
         requestId = "uniqueId",
+        workMode = CardRequestWorkModeDto(
+            mode = CardRequestWorkModeDto.Mode.STUB,
+            stubCase = CardRequestWorkModeDto.StubCase.SUCCESS
+        ),
         guid = "eb770343-0339-43a9-aee9-54dccba2cf8e"
     )
 
     private val updateRequest: IRequestDto = CardUpdateRequestDto(
         requestType = "cardUpdate",
         requestId = "db630ffa-85e2-4cb0-9c15-23f662e36685",
+        workMode = CardRequestWorkModeDto(
+            mode = CardRequestWorkModeDto.Mode.STUB,
+            stubCase = CardRequestWorkModeDto.StubCase.SUCCESS
+        ),
         card = CardObjectDto(
             guid = "eb770343-0339-43a9-aee9-54dccba2cf8e",
             number = "5191891428863955",
@@ -45,6 +57,10 @@ class CardRequestSerializationTest {
     private val deleteRequest: IRequestDto = CardDeleteRequestDto(
         requestType = "cardDelete",
         requestId = "db630ffa-85e2-4cb0-9c15-23f662e36685",
+        workMode = CardRequestWorkModeDto(
+            mode = CardRequestWorkModeDto.Mode.STUB,
+            stubCase = CardRequestWorkModeDto.StubCase.SUCCESS
+        ),
         guid = "eb770343-0339-43a9-aee9-54dccba2cf8e"
     )
 
@@ -93,7 +109,11 @@ class CardRequestSerializationTest {
         val jsonString = """
             {
                 "requestType":"cardCreate",
-                "requestId":"db630ffa-85e2-4cb0-9c15-23f662e36685",                                            
+                "requestId":"db630ffa-85e2-4cb0-9c15-23f662e36685",
+                "workMode": {
+                    "mode": "stub",
+                    "stubCase": "success"
+                },
                 "card": {
                     "number":"5191891428863955",
                     "valid_for": "2026-04",

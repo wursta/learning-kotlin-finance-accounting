@@ -50,7 +50,7 @@ openApiGenerate {
     apiPackage.set("$openapiGroup.api")
     modelPackage.set("$openapiGroup.models")
     invokerPackage.set("$openapiGroup.invoker")
-    inputSpec.set("$rootDir/specs/v1/openapi.yaml")
+    inputSpec.set("$rootDir/specs/openapi.yaml")
     modelNameSuffix.set("Dto")
     library.set("multiplatform")
 
@@ -69,7 +69,7 @@ openApiGenerate {
 }
 
 openApiValidate {
-    inputSpec.set("$rootDir/specs/v1/openapi.yaml")
+    inputSpec.set("$rootDir/specs/openapi.yaml")
 }
 
 afterEvaluate {
@@ -85,7 +85,7 @@ tasks {
         group = "openapi tools"
 
         generatorName.set("openapi-yaml")
-        inputSpec.set("$rootDir/specs/v1/openapi.yaml")
+        inputSpec.set("$rootDir/specs/openapi.yaml")
         outputDir.set("$buildDir/generate-resources/specs")
     }
 }

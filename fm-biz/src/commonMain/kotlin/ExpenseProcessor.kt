@@ -1,37 +1,155 @@
 package local.learning.app.biz
 
+import com.crowdproj.kotlin.cor.handlers.worker
+import com.crowdproj.kotlin.cor.rootChain
+import kotlinx.datetime.Clock
 import local.learning.app.biz.exception.UnexpectedContext
-import local.learning.app.biz.exception.UnknownExpenseCommand
+import local.learning.app.biz.groups.expense.*
+import local.learning.app.biz.workers.expense.*
 import local.learning.common.ExpenseContext
 import local.learning.common.IContext
+import local.learning.common.errors.ErrorCode
+import local.learning.common.errors.ErrorGroup
+import local.learning.common.exceptions.InvalidFieldFormat
+import local.learning.common.helpers.addError
+import local.learning.common.log.ILogWrapper
+import local.learning.common.models.Error
+import local.learning.common.models.State
 import local.learning.common.models.expense.ExpenseCommand
-import local.learning.stubs.ExpenseStub
+import local.learning.common.models.expense.ExpenseGuid
 
 class ExpenseProcessor: IProcessor {
-    override fun exec(ctx: IContext) {
+    override suspend fun exec(ctx: IContext) {
         if (ctx !is ExpenseContext) {
             throw UnexpectedContext()
         }
-        when (ctx.command) {
-            ExpenseCommand.CREATE -> {
-                ctx.expenseResponse = ExpenseStub.get()
+
+        return BusinessChain.exec(ctx)
+    }
+
+    suspend fun <T> process(
+        logger: ILogWrapper,
+        logId: String,
+        command: ExpenseCommand,
+        fromTransport: suspend (ExpenseContext) -> Unit,
+        sendResponse: suspend (ExpenseContext) -> T
+    ): T {
+        val ctx = ExpenseContext(
+            timeStart = Clock.System.now()
+        )
+        var realCommand = command
+
+        return try {
+            logger.doWithLogging {
+                fromTransport(ctx)
+                realCommand = ctx.command
+
+                logger.info(
+                    msg = "$realCommand request received",
+                    //data = ctx.toLog("${logId}-got")
+                )
+
+                exec(ctx)
+
+                logger.info(
+                    msg = "$realCommand request processed",
+                    //data = ctx.toLog("${logId}-handled")
+                )
+
+                sendResponse(ctx)
             }
-            ExpenseCommand.READ -> {
-                ctx.expenseResponse = ExpenseStub.get()
+        } catch (e: InvalidFieldFormat) {
+            ctx.state = State.FAILING
+            ctx.addError(Error(ErrorCode.INVALID_FIELD_FORMAT, ErrorGroup.VALIDATION, e.field, e.message ?: ""))
+            sendResponse(ctx)
+        } catch (e: Throwable) {
+            logger.doWithLogging(id = "${logId}-failure") {
+                logger.error(
+                    msg = "$realCommand process failed"
+                    //data = ctx.toLog("${logId}-got")
+                )
+
+                ctx.command = realCommand
+                ctx.state = State.FAILING
+                ctx.addError(Error(ErrorCode.UNKNOWN, ErrorGroup.EXCEPTIONS, "", e.message ?: ""))
+                sendResponse(ctx)
             }
-            ExpenseCommand.UPDATE -> {
-                ctx.expenseResponse = ExpenseStub.get()
-            }
-            ExpenseCommand.DELETE -> {
-                ctx.expenseResponse = ExpenseStub.get()
-            }
-            ExpenseCommand.SEARCH -> {
-                ctx.expenseSearchResponse.addAll(ExpenseStub.getList())
-            }
-            ExpenseCommand.STATS -> {
-                ctx.expenseStatisticResponse = ExpenseStub.getStatistic()
-            }
-            else -> throw UnknownExpenseCommand(ctx.command)
         }
+    }
+
+    companion object {
+        private val BusinessChain = rootChain {
+            init("Инициализация")
+
+            operation("Создание новой траты", ExpenseCommand.CREATE) {
+                stubCreate("Обработка стабов создания")
+
+                validation {
+                    worker("Копируем поля в expenseValidating") { expenseValidating = expenseRequest.copy() }
+                    worker("Очистка guid") { expenseValidating.guid = ExpenseGuid.NONE }
+
+                    validateAmount("Проверка суммы")
+                    validateCardGuid("Проверка формата guid карты")
+                    validateCategoryGuid("Проверка формата guid категории")
+                }
+            }
+
+            operation("Чтение траты", ExpenseCommand.READ) {
+                stubRead("Обработка стабов чтения")
+
+                validation {
+                    worker("Копируем поля в expenseValidating") { expenseValidating = expenseRequest.copy() }
+
+                    validateGuid("Проверка guid траты")
+                }
+            }
+
+            operation("Обновление траты", ExpenseCommand.UPDATE) {
+                stubUpdate("Обработка стабов обновления")
+
+                validation {
+                    worker("Копируем поля в expenseValidating") { expenseValidating = expenseRequest.copy() }
+
+                    validateGuid("Проверка guid траты")
+                    validateAmount("Проверка суммы")
+                    validateCardGuid("Проверка формата guid карты")
+                    validateCategoryGuid("Проверка формата guid категории")
+                }
+            }
+
+            operation("Удаление траты", ExpenseCommand.DELETE) {
+                stubDelete("Обработка стабов удаления")
+
+                validation {
+                    worker("Копируем поля в expenseValidating") { expenseValidating = expenseRequest.copy() }
+
+                    validateGuid("Проверка guid траты")
+                }
+            }
+
+            operation("Поиск трат", ExpenseCommand.SEARCH) {
+                stubSearch("Обработка стабов поиска")
+
+                validation {
+                    worker("Копируем поля в expenseSearchValidating") { expenseSearchValidating = expenseSearchRequest.copy() }
+
+                    validateSearchFilterAmountFrom("Проверка фильтра поиска amount_from")
+                    validateSearchFilterAmountTo("Проверка фильтра поиска amount_to")
+                    validateSearchFilterDateFrom("Проверка фильтра поиска date_from")
+                    validateSearchFilterDateTo("Проверка фильтра поиска date_to")
+                    validateSearchFilterSources("Проверка фильтра поиска sources")
+                }
+            }
+
+            operation("Статистика трат", ExpenseCommand.STATS) {
+                stubStatistic("Обработка стабов статистики")
+
+                validation {
+                    worker("Копируем поля в expenseStatisticValidating") { expenseStatisticValidating = expenseStatisticRequest.copy() }
+                    validateStatisticFilterDateFrom("Проверка фильтра стратистики date_from")
+                    validateStatisticFilterDateTo("Проверка фильтра стратистики date_to")
+                }
+            }
+        }.build()
     }
 }

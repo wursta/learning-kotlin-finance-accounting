@@ -57,6 +57,7 @@ kotlin {
                 implementation(project(":fm-common"))
                 implementation(project(":fm-mappers"))
                 implementation(project(":fm-biz"))
+                implementation(project(":fm-app-logging-kermit"))
 
                 // Stubs
                 implementation(project(":fm-stubs"))

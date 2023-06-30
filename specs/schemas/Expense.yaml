@@ -10,6 +10,8 @@ ExpenseAmount:
   type: number
   description: Сумма траты
   format: 'double'
+  minimum: 0
+  exclusiveMinimum: true
 
 ExpenseFilter:
   type: object

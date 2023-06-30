@@ -342,12 +342,110 @@ components:
         message:
           type: string
 
+    # STUBS
+    CardRequestWorkMode:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum:
+            - prod
+            - test
+            - stub
+        stubCase:
+          type: string
+          description: Возможные стабы
+          enum:
+            - success
+            - bad_guid
+            - bad_number
+            - bad_valid_for
+            - bad_owner
+            - bad_bank_guid
+            -
+    ExpenseRequestWorkMode:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum:
+            - prod
+            - test
+            - stub
+        stubCase:
+          type: string
+          description: Возможные стабы
+          enum:
+            - success
+            - bad_guid
+            - bad_amount
+            - bad_card_guid
+            - bad_category_guid
+            - bad_search_filter_amount_from
+            - bad_search_filter_amount_to
+            - bad_search_filter_sources
+            - bad_statistic_filter_date_from
+            - bad_statistic_filter_date_to
+
+    # LOGS
+    ErrorLogModel:
+      title: Модель лога для ошибки
+      type: object
+      properties:
+        message:
+          type: string
+        field:
+          type: string
+        code:
+          type: string
+        level:
+          type: string
+
+    CommonCardLogModel:
+      title: Общая модель лога
+      description: Общая модель лога для банковских карт
+      type: object
+      properties:
+        messageTime:
+          type: string
+        logId:
+          type: string
+        source:
+          type: string
+        card:
+          $ref: '#/components/schemas/CardLogModel'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorLogModel'
+
+    CardLogModel:
+      title: Модель лога для банковской карты
+      type: object
+      properties:
+        requestId:
+          type: string
+        operation:
+          type: string
+          enum:
+            - cardCreate
+            - cardRead
+            - cardUpdate
+            - cardDelete
+        requestCard:
+          $ref: './schemas/Card.yaml#/CardObject'
+        responseCard:
+          $ref: './schemas/Card.yaml#/CardObject'
+
+    # REQUESTS & RESPONSES
     # CardCreate
     CardCreateRequest:
       allOf:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/CardRequestWorkMode'
             card:
               $ref: './schemas/Card.yaml#/CardCreateObject'
 
@@ -362,6 +460,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/CardRequestWorkMode'
             guid:
               $ref: './schemas/Card.yaml#/CardGUID'
 
@@ -376,6 +476,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/CardRequestWorkMode'
             card:
               $ref: './schemas/Card.yaml#/CardObject'
 
@@ -390,6 +492,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/CardRequestWorkMode'
             guid:
               $ref: './schemas/Card.yaml#/CardGUID'
 
@@ -404,6 +508,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/ExpenseRequestWorkMode'
             expense:
               $ref: './schemas/Expense.yaml#/ExpenseCreateObject'
 
@@ -418,6 +524,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/ExpenseRequestWorkMode'
             guid:
               $ref: './schemas/Expense.yaml#/ExpenseGUID'
 
@@ -432,6 +540,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/ExpenseRequestWorkMode'
             expense:
               $ref: './schemas/Expense.yaml#/ExpenseObject'
 
@@ -446,6 +556,8 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           properties:
+            workMode:
+              $ref: '#/components/schemas/ExpenseRequestWorkMode'
             guid:
               $ref: './schemas/Expense.yaml#/ExpenseGUID'
 
@@ -459,6 +571,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/IRequest'
         - $ref: './schemas/Expense.yaml#/ExpenseFilter'
+        - type: object
+          properties:
+            workMode:
+              $ref: '#/components/schemas/ExpenseRequestWorkMode'
 
     ExpenseSearchResponse:
       allOf:
@@ -470,6 +586,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/IRequest'
         - $ref: './schemas/Expense.yaml#/ExpenseStatFilter'
+        - type: object
+          properties:
+            workMode:
+              $ref: '#/components/schemas/ExpenseRequestWorkMode'
 
     ExpenseStatsResponse:
       allOf:

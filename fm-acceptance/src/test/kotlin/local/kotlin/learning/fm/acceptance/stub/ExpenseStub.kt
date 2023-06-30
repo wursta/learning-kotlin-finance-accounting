@@ -3,63 +3,80 @@ package local.kotlin.learning.fm.acceptance.stub
 import local.learning.api.models.*
 
 object ExpenseStub {
-    val createRequest = ExpenseCreateRequestDto(
-        requestType = "expenseCreate",
-        requestId = "uniqueId",
-        expense = ExpenseCreateObjectDto(
-            createDt = "2023-05-11T18:18:47.042Z",
-            amount = 100.0,
-            card = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            category = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    fun getCreateRequest(stubCase: ExpenseRequestWorkModeDto.StubCase): ExpenseCreateRequestDto {
+        return ExpenseCreateRequestDto(
+            requestType = "expenseCreate",
+            requestId = "uniqueId",
+            workMode = ExpenseRequestWorkModeDto(
+                mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                stubCase = stubCase
+            )
         )
-    )
+    }
 
-    val readRequest = ExpenseReadRequestDto(
-        requestType = "expenseRead",
-        requestId = "uniqueId",
-        guid = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-    )
-
-    val updateRequest = ExpenseUpdateRequestDto(
-        requestType = "expenseUpdate",
-        requestId = "uniqueId",
-        expense = ExpenseObjectDto(
-            guid = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            createDt = "2023-05-11T18:18:47.042Z",
-            amount = 100.0,
-            card = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            category = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    fun getReadRequest(stubCase: ExpenseRequestWorkModeDto.StubCase): ExpenseReadRequestDto {
+        return ExpenseReadRequestDto(
+            requestType = "expenseRead",
+            requestId = "uniqueId",
+            workMode = ExpenseRequestWorkModeDto(
+                mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                stubCase = stubCase
+            )
         )
-    )
+    }
 
-    val deleteRequest = ExpenseDeleteRequestDto(
-        requestType = "expenseDelete",
-        requestId = "uniqueId",
-        guid = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-    )
+    fun getUpdateRequest(stubCase: ExpenseRequestWorkModeDto.StubCase): ExpenseUpdateRequestDto {
+        return ExpenseUpdateRequestDto(
+            requestType = "expenseUpdate",
+            requestId = "uniqueId",
+            workMode = ExpenseRequestWorkModeDto(
+                mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                stubCase = stubCase
+            )
+        )
+    }
 
-    val searchRequest = ExpenseSearchRequestDto(
-        requestType = "expensesSearch",
-        requestId = "uniqueId",
-        dateFrom = "2023-05-12T17:41:06.765Z",
-        dateTo = "2023-05-12T17:41:06.765Z",
-        cards = listOf("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-    )
+    fun getDeleteRequest(stubCase: ExpenseRequestWorkModeDto.StubCase): ExpenseDeleteRequestDto {
+        return ExpenseDeleteRequestDto(
+            requestType = "expenseUpdate",
+            requestId = "uniqueId",
+            workMode = ExpenseRequestWorkModeDto(
+                mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                stubCase = stubCase
+            )
+        )
+    }
 
-    val statsRequest = ExpenseStatsRequestDto(
-        requestType = "expensesStats",
-        requestId = "uniqueId",
-        dateFrom = "2023-05-12T17:42:33.806Z",
-        dateTo = "2023-05-12T17:42:33.806Z"
-    )
+    fun getSearchRequest(stubCase: ExpenseRequestWorkModeDto.StubCase): ExpenseSearchRequestDto {
+        return ExpenseSearchRequestDto(
+            requestType = "expensesSearch",
+            requestId = "uniqueId",
+            workMode = ExpenseRequestWorkModeDto(
+                mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                stubCase = stubCase
+            )
+        )
+    }
+
+    fun getStatisticRequest(stubCase: ExpenseRequestWorkModeDto.StubCase): ExpenseStatsRequestDto {
+        return ExpenseStatsRequestDto(
+            requestType = "expensesStats",
+            requestId = "uniqueId",
+            workMode = ExpenseRequestWorkModeDto(
+                mode = ExpenseRequestWorkModeDto.Mode.STUB,
+                stubCase = stubCase
+            )
+        )
+    }
 
     val createResponse = ExpenseCreateResponseDto(
         responseType = "expenseCreate",
         requestId = "uniqueId",
         result = ResponseResultDto.SUCCESS,
+        errors = emptyList(),
         expense = ExpenseObjectDto(
             guid = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            createDt = "2023-05-27T20:50:58.763700736",
+            createDt = "2023-01-01T14:46:04",
             amount = 100.0,
             card = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
             category = "5410bdaf-834a-4ca6-9044-ee25d5a7164c"
@@ -70,35 +87,38 @@ object ExpenseStub {
         responseType = "expenseRead",
         requestId = "uniqueId",
         result = ResponseResultDto.SUCCESS,
+        errors = emptyList(),
         expense = ExpenseObjectDto(
             guid = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            createDt = "2023-05-27T20:50:58.763700736",
+            createDt = "2023-01-01T14:46:04",
             amount = 100.0,
             card = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
             category = "5410bdaf-834a-4ca6-9044-ee25d5a7164c"
         )
     )
 
-    val updateResponse = ExpenseReadResponseDto(
+    val updateResponse = ExpenseUpdateResponseDto(
         responseType = "expenseUpdate",
         requestId = "uniqueId",
         result = ResponseResultDto.SUCCESS,
+        errors = emptyList(),
         expense = ExpenseObjectDto(
             guid = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            createDt = "2023-05-27T20:50:58.763700736",
+            createDt = "2023-01-01T14:46:04",
             amount = 100.0,
             card = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
             category = "5410bdaf-834a-4ca6-9044-ee25d5a7164c"
         )
     )
 
-    val deleteResponse = ExpenseReadResponseDto(
+    val deleteResponse = ExpenseDeleteResponseDto(
         responseType = "expenseDelete",
         requestId = "uniqueId",
         result = ResponseResultDto.SUCCESS,
+        errors = emptyList(),
         expense = ExpenseObjectDto(
             guid = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            createDt = "2023-05-27T20:50:58.763700736",
+            createDt = "2023-01-01T14:46:04",
             amount = 100.0,
             card = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
             category = "5410bdaf-834a-4ca6-9044-ee25d5a7164c"
@@ -109,11 +129,19 @@ object ExpenseStub {
         responseType = "expensesSearch",
         requestId = "uniqueId",
         result = ResponseResultDto.SUCCESS,
+        errors = emptyList(),
         expenses = listOf(
             ExpenseObjectDto(
                 guid = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                createDt = "2023-05-27T20:50:58.763700736",
+                createDt = "2023-01-01T14:46:04",
                 amount = 100.0,
+                card = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                category = "5410bdaf-834a-4ca6-9044-ee25d5a7164c"
+            ),
+            ExpenseObjectDto(
+                guid = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                createDt = "2023-01-01T14:46:04",
+                amount = 205.32,
                 card = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                 category = "5410bdaf-834a-4ca6-9044-ee25d5a7164c"
             )
@@ -124,6 +152,7 @@ object ExpenseStub {
         responseType = "expensesStats",
         requestId = "uniqueId",
         result = ResponseResultDto.SUCCESS,
+        errors = emptyList(),
         total = 105304.0,
         summary = listOf(
             ExpenseStatSummaryItemDto(
@@ -143,7 +172,7 @@ object ExpenseStub {
             ExpenseStatSummaryItemDto(
                 amount = 54616.5,
                 category = CategoryObjectDto(
-                    guid = "5410bdaf-834a-4ca6-9044-ee25d8a7164c",
+                    guid = "5410bdaf-834a-4ga6-9044-ee25d8a7164c",
                     name ="Одежда"
                 )
             )

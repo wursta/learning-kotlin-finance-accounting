@@ -7,29 +7,26 @@ import io.ktor.server.response.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import local.learning.api.models.IRequestDto
-import local.learning.api.models.InternalErrorResponseDto
 import local.learning.api.serialization.utils.jsonSerializer
-import local.learning.app.biz.CardProcessor
-import local.learning.common.CardContext
+import local.learning.app.ktor.ApplicationSettings
+import local.learning.common.models.card.CardCommand
 import local.learning.mappers.fromTransport
 import local.learning.mappers.toTransport
 
-suspend inline fun <reified T : IRequestDto> ApplicationCall.cardAction(processor: CardProcessor) {
-    try {
-        val request = jsonSerializer.decodeFromString<T>(receiveText())
-        val context = CardContext()
-        context.fromTransport(request)
-        processor.exec(context)
-        respondText(jsonSerializer.encodeToString(context.toTransport()), ContentType.Application.Json)
-    } catch (e: Throwable) {
-        respondText(
-            text = jsonSerializer.encodeToString(
-                InternalErrorResponseDto(
-                    message = e.message
-                )
-            ),
-            contentType = ContentType.Application.Json,
-            status = HttpStatusCode.InternalServerError
-        )
-    }
+suspend inline fun <reified T : IRequestDto> ApplicationCall.cardAction(
+    appSettings: ApplicationSettings,
+    realCommand: CardCommand
+) {
+    appSettings.cardProcessor.process(
+        logger = appSettings.corSettings.loggerProvider.logger(T::class),
+        logId = T::class.qualifiedName ?: "unknown",
+        command = realCommand,
+        {
+            val request = jsonSerializer.decodeFromString<T>(receiveText())
+            it.fromTransport(request)
+        },
+        {
+            respondText(jsonSerializer.encodeToString(it.toTransport()), ContentType.Application.Json)
+        }
+    )
 }
