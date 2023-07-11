@@ -6,6 +6,7 @@ import kotlinx.datetime.Clock
 import local.learning.app.biz.exception.UnexpectedContext
 import local.learning.app.biz.groups.expense.*
 import local.learning.app.biz.workers.expense.*
+import local.learning.common.CorSettings
 import local.learning.common.ExpenseContext
 import local.learning.common.IContext
 import local.learning.common.errors.ErrorCode
@@ -18,13 +19,15 @@ import local.learning.common.models.State
 import local.learning.common.models.expense.ExpenseCommand
 import local.learning.common.models.expense.ExpenseGuid
 
-class ExpenseProcessor: IProcessor {
+class ExpenseProcessor(val corSettings: CorSettings = CorSettings.NONE): IProcessor {
     override suspend fun exec(ctx: IContext) {
         if (ctx !is ExpenseContext) {
             throw UnexpectedContext()
         }
 
-        return BusinessChain.exec(ctx)
+        return BusinessChain.exec(ctx.apply{
+            this.corSettings = this@ExpenseProcessor.corSettings
+        })
     }
 
     suspend fun <T> process(
@@ -80,6 +83,7 @@ class ExpenseProcessor: IProcessor {
     companion object {
         private val BusinessChain = rootChain {
             init("Инициализация")
+            initRepo()
 
             operation("Создание новой траты", ExpenseCommand.CREATE) {
                 stubCreate("Обработка стабов создания")
@@ -92,6 +96,9 @@ class ExpenseProcessor: IProcessor {
                     validateCardGuid("Проверка формата guid карты")
                     validateCategoryGuid("Проверка формата guid категории")
                 }
+
+                repoCreate()
+                prepareExpenseResult()
             }
 
             operation("Чтение траты", ExpenseCommand.READ) {
@@ -102,6 +109,9 @@ class ExpenseProcessor: IProcessor {
 
                     validateGuid("Проверка guid траты")
                 }
+
+                repoRead()
+                prepareExpenseResult()
             }
 
             operation("Обновление траты", ExpenseCommand.UPDATE) {
@@ -115,6 +125,9 @@ class ExpenseProcessor: IProcessor {
                     validateCardGuid("Проверка формата guid карты")
                     validateCategoryGuid("Проверка формата guid категории")
                 }
+
+                repoUpdate()
+                prepareExpenseResult()
             }
 
             operation("Удаление траты", ExpenseCommand.DELETE) {
@@ -125,6 +138,9 @@ class ExpenseProcessor: IProcessor {
 
                     validateGuid("Проверка guid траты")
                 }
+
+                repoDelete()
+                prepareExpenseResult()
             }
 
             operation("Поиск трат", ExpenseCommand.SEARCH) {
@@ -139,6 +155,9 @@ class ExpenseProcessor: IProcessor {
                     validateSearchFilterDateTo("Проверка фильтра поиска date_to")
                     validateSearchFilterSources("Проверка фильтра поиска sources")
                 }
+
+                repoSearch()
+                prepareSearchResult()
             }
 
             operation("Статистика трат", ExpenseCommand.STATS) {
@@ -149,6 +168,9 @@ class ExpenseProcessor: IProcessor {
                     validateStatisticFilterDateFrom("Проверка фильтра стратистики date_from")
                     validateStatisticFilterDateTo("Проверка фильтра стратистики date_to")
                 }
+
+                repoStatistic()
+                prepareStatisticResult()
             }
         }.build()
     }

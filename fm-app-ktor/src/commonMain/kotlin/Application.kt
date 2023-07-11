@@ -19,15 +19,23 @@ import local.learning.app.ktor.routing.card
 import local.learning.app.ktor.routing.expense
 import local.learning.common.CorSettings
 import local.learning.common.log.LoggerProvider
+import local.learning.repo.inmemory.CardInMemoryRepository
+import local.learning.repo.inmemory.ExpenseInMemoryRepository
 
 expect fun Application.getLoggerProviderConf(): LoggerProvider
-fun Application.initAppSettings(): ApplicationSettings = ApplicationSettings(
-    corSettings = CorSettings(
-        loggerProvider = getLoggerProviderConf()
-    ),
-    cardProcessor = CardProcessor(),
-    expenseProcessor = ExpenseProcessor(),
-)
+fun Application.initAppSettings(): ApplicationSettings {
+    val corSettings = CorSettings(
+        loggerProvider = getLoggerProviderConf(),
+        cardRepoTest = CardInMemoryRepository(),
+        expenseRepoTest = ExpenseInMemoryRepository()
+    )
+
+    return ApplicationSettings(
+        corSettings = corSettings,
+        cardProcessor = CardProcessor(corSettings),
+        expenseProcessor = ExpenseProcessor(corSettings),
+    )
+}
 
 fun Application.mainModule(
     appSettings: ApplicationSettings = initAppSettings()

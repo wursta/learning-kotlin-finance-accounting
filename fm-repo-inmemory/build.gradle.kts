@@ -6,23 +6,25 @@ kotlin {
     jvm {}
 
     sourceSets {
-        @Suppress("UNUSED_VARIABLE")
+        val cache4kVersion: String by project
+        val uuidVersion: String by project
+        val coroutinesVersion: String by project
+
         val commonMain by getting {
             dependencies {
-                val crowdprojKotlinCorVersion: String by project
-                implementation(kotlin("stdlib-common"))
-                implementation("com.crowdproj:kotlin-cor:$crowdprojKotlinCorVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+                implementation("io.github.reactivecircus.cache4k:cache4k:$cache4kVersion")
+                implementation("com.benasher44:uuid:$uuidVersion")
 
+
+                // Project
                 implementation(project(":fm-common"))
-                implementation(project(":fm-stubs"))
-                implementation(project(":fm-repo-inmemory"))
             }
         }
 
         @Suppress("UNUSED_VARIABLE")
         val commonTest by getting {
             dependencies {
-                val coroutinesVersion: String by project
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")

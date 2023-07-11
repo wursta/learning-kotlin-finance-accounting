@@ -58,9 +58,8 @@ kotlin {
                 implementation(project(":fm-mappers"))
                 implementation(project(":fm-biz"))
                 implementation(project(":fm-app-logging-kermit"))
-
-                // Stubs
                 implementation(project(":fm-stubs"))
+                implementation(project(":fm-repo-inmemory"))
             }
         }
 

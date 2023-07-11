@@ -13,6 +13,10 @@ CardValidFor:
 CardOwner:
   type: string
   description: Владелец
+CardLockGUID:
+  type: string
+  description: GUID блокировки
+  format: uuid
 
 CardCreateObject:
   type: object
@@ -41,6 +45,8 @@ CardObject:
       $ref: './Card.yaml#/CardOwner'
     bank:
       $ref: './Bank.yaml#/BankObject'
+    lock:
+      $ref: './Card.yaml#/CardLockGUID'
 
 CardResponseSingle:
   allOf:

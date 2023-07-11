@@ -8,6 +8,7 @@ import local.learning.common.models.WorkMode
 import local.learning.common.models.card.Card
 import local.learning.common.models.card.CardCommand
 import local.learning.common.models.card.CardStubCase
+import local.learning.common.repo.ICardRepository
 
 data class CardContext(
     // Request
@@ -20,10 +21,19 @@ data class CardContext(
     var stubCase: CardStubCase = CardStubCase.NONE,
     var command: CardCommand = CardCommand.NONE,
 
+    //COR settings
+    var corSettings: CorSettings = CorSettings.NONE,
+
+    // Repo
+    var repo: ICardRepository = ICardRepository.NONE,
+
     // Requests & Responses
     var cardRequest: Card = Card(),
     var cardResponse: Card = Card(),
 
-    // Validation
-    var cardValidating: Card = Card()
+    // Validation results
+    var cardValidating: Card = Card(),
+
+    // Repo results
+    var cardRepoResult: Card = Card()
 ): IContext
