@@ -110,7 +110,7 @@ fun CorChainDsl<ExpenseContext>.repoSearch() = worker {
         )
         val result = repo.search(request)
         val resultExpenses = result.expenses
-        if (result.success && resultExpenses.isNotEmpty()) {
+        if (result.success) {
             expenseSearchRepoResult = resultExpenses
         } else {
             state = State.FAILING

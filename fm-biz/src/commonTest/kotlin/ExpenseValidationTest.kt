@@ -8,6 +8,7 @@ import local.learning.common.CorSettings
 import local.learning.common.ExpenseContext
 import local.learning.common.errors.ErrorCode
 import local.learning.common.errors.ErrorGroup
+import local.learning.common.models.LockGuid
 import local.learning.common.models.State
 import local.learning.common.models.WorkMode
 import local.learning.common.models.card.CardGuid
@@ -23,7 +24,18 @@ import kotlin.test.assertNotEquals
 class ExpenseValidationTest {
     private val processor = ExpenseProcessor(
         CorSettings(
-            expenseRepoTest = ExpenseInMemoryRepository()
+            expenseRepoTest = ExpenseInMemoryRepository(
+                initObjects = listOf(
+                    Expense(
+                        guid = ExpenseGuid("1598044e-5259-11e9-8647-d663bd873d93"),
+                        createDT = Clock.System.now(),
+                        amount = BigDecimal(1234.56),
+                        cardGuid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93"),
+                        categoryGuid = CategoryGuid("5410bdaf-834a-4ca6-9044-ee25d5a7164c"),
+                        lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
+                    )
+                )
+            )
         )
     )
 
@@ -125,7 +137,8 @@ class ExpenseValidationTest {
                 createDT = Clock.System.now(),
                 amount = BigDecimal(1234.56),
                 cardGuid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93"),
-                categoryGuid = CategoryGuid("5410bdaf-834a-4ca6-9044-ee25d5a7164c")
+                categoryGuid = CategoryGuid("5410bdaf-834a-4ca6-9044-ee25d5a7164c"),
+                lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
             )
         )
 
@@ -178,7 +191,8 @@ class ExpenseValidationTest {
             command = ExpenseCommand.DELETE,
             workMode = WorkMode.TEST,
             expenseRequest = Expense(
-                guid = ExpenseGuid("1598044e-5259-11e9-8647-d663bd873d93")
+                guid = ExpenseGuid("1598044e-5259-11e9-8647-d663bd873d93"),
+                lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
             )
         )
 
