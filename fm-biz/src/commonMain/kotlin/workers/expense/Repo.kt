@@ -20,6 +20,8 @@ fun CorChainDsl<ExpenseContext>.initRepo() = worker {
     handle {
         if (workMode == WorkMode.TEST) {
             repo = corSettings.expenseRepoTest
+        } else if (workMode == WorkMode.PROD) {
+            repo = corSettings.expenseRepoProd
         }
         if (workMode != WorkMode.STUB && repo == IExpenseRepository.NONE) {
             throw Exception("The database is unconfigured for chosen work mode [$workMode]")

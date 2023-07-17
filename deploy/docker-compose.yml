@@ -21,6 +21,34 @@ services:
         # теги используются для маршрутизации лог-сообщений, тема
         # маршрутизации будет рассмотрена ниже
         tag: app.logs
+    environment:
+      ARCADEDB_HOST: arcadedb
+      ARCADEDB_PORT: 2480
+      ARCADEDB_USER: root
+      ARCADEDB_PASS: root_root
+      ARCADEDB_DBNAME: FinancialManagement
+    depends_on:
+      arcadedb:
+        condition: service_healthy
+
+  arcadedb:
+    image: "arcadedata/arcadedb:23.4.1"
+    ports:
+      - "2480:2480"
+      - "2424:2424"
+      - "8182:8182"
+    expose:
+      - "2480"
+    volumes:
+      - arcadedb_data:/home/arcadedb/databases
+    environment:
+      JAVA_OPTS: "-Darcadedb.server.rootPassword=root_root"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:2480/api/v1/ready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
   swagger-ui:
     image: swaggerapi/swagger-ui
@@ -101,5 +129,6 @@ services:
       - opensearch
 
 volumes:
+  arcadedb_data:
   opensearch-data1:
   opensearch-data2:

@@ -1,5 +1,6 @@
 package local.kotlin.learning.fm.acceptance.rest
 
+import ArcadeDbSchema
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.datatest.withData
@@ -9,9 +10,11 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import local.kotlin.learning.fm.acceptance.AppCompose
 import local.kotlin.learning.fm.acceptance.CardTestDataProvider
 import local.kotlin.learning.fm.acceptance.RestClient
 import local.learning.api.models.*
+import mu.KotlinLogging
 
 object CardRoutes {
     const val CREATE = "api/card/create"
@@ -20,16 +23,30 @@ object CardRoutes {
     const val DELETE = "api/card/delete"
 }
 
+private val log = KotlinLogging.logger {}
+
 @OptIn(ExperimentalKotest::class)
 class CardTest : BehaviorSpec({
-//    beforeEach {
-//        clearDb()
-//    }
+
+    beforeTest {
+        val arcadeDbHost = AppCompose.C.hostArcadeDb
+        val arcadeDbPort = AppCompose.C.portArcadeDb
+        val arcadeDbName = AppCompose.arcadeDbName
+        val arcadeDbUserName = AppCompose.arcadeDbUserName
+        val arcadeDbUserPass = AppCompose.arcadeDbUserPass
+
+        log.info { "Clear ArcadeDB database" }
+
+        ArcadeDbSchema.clear(arcadeDbHost, arcadeDbPort, arcadeDbName, arcadeDbUserName, arcadeDbUserPass)
+    }
 
     withData(
         listOf(
             CardTestDataProvider(
                 workMode = CardRequestWorkModeDto.Mode.TEST
+            ),
+            CardTestDataProvider(
+                workMode = CardRequestWorkModeDto.Mode.PROD
             )
         )
     ) { (workMode) ->

@@ -15,6 +15,8 @@ fun CorChainDsl<CardContext>.initRepo() = worker {
     handle {
         if (workMode == WorkMode.TEST) {
             repo = corSettings.cardRepoTest
+        } else if (workMode == WorkMode.PROD) {
+            repo = corSettings.cardRepoProd
         }
         if (workMode != WorkMode.STUB && repo == ICardRepository.NONE) {
             throw Exception("The database is unconfigured for chosen work mode [$workMode]")
