@@ -15,6 +15,7 @@ kotlin {
 
                 implementation(project(":fm-common"))
                 implementation(project(":fm-stubs"))
+                implementation(project(":fm-repo-inmemory"))
             }
         }
 

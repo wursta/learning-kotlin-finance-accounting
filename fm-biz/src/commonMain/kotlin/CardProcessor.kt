@@ -7,6 +7,7 @@ import local.learning.app.biz.exception.UnexpectedContext
 import local.learning.app.biz.groups.card.*
 import local.learning.app.biz.workers.card.*
 import local.learning.common.CardContext
+import local.learning.common.CorSettings
 import local.learning.common.IContext
 import local.learning.common.errors.ErrorCode
 import local.learning.common.errors.ErrorGroup
@@ -18,13 +19,15 @@ import local.learning.common.models.State
 import local.learning.common.models.card.CardCommand
 import local.learning.common.models.card.CardGuid
 
-class CardProcessor : IProcessor {
+class CardProcessor(val corSettings: CorSettings = CorSettings.NONE) : IProcessor {
     override suspend fun exec(ctx: IContext) {
         if (ctx !is CardContext) {
             throw UnexpectedContext()
         }
 
-        return BusinessChain.exec(ctx)
+        return BusinessChain.exec(ctx.apply {
+            this.corSettings = this@CardProcessor.corSettings
+        })
     }
 
     suspend fun <T> process(
@@ -80,6 +83,7 @@ class CardProcessor : IProcessor {
     companion object {
         private val BusinessChain = rootChain {
             init("Инициализация")
+            initRepo()
 
             operation("Создание новой карты", CardCommand.CREATE) {
                 stubCreate("Обработка стабов создания")
@@ -93,6 +97,10 @@ class CardProcessor : IProcessor {
                     validateOwner("Проверка формата владельца")
                     validateBankGuid("Проверка формата guid банка")
                 }
+
+
+                repoCreate()
+                prepareResponse()
             }
 
             operation("Чтение карты", CardCommand.READ) {
@@ -102,6 +110,9 @@ class CardProcessor : IProcessor {
                     worker("Копируем поля в cardValidating") { cardValidating = cardRequest.copy() }
                     validateGuid("Проверка формата guid карты")
                 }
+
+                repoRead()
+                prepareResponse()
             }
 
             operation("Обновление карты", CardCommand.UPDATE) {
@@ -116,6 +127,9 @@ class CardProcessor : IProcessor {
                     validateOwner("Проверка формата владельца")
                     validateBankGuid("Проверка формата guid банка")
                 }
+
+                repoUpdate()
+                prepareResponse()
             }
 
             operation("Удаление карты", CardCommand.DELETE) {
@@ -125,6 +139,9 @@ class CardProcessor : IProcessor {
                     worker("Копируем поля в cardValidating") { cardValidating = cardRequest.copy() }
                     validateGuid("Проверка формата guid карты")
                 }
+
+                repoDelete()
+                prepareResponse()
             }
         }.build()
     }

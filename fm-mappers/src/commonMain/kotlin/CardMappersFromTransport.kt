@@ -2,6 +2,7 @@ package local.learning.mappers
 
 import local.learning.api.models.*
 import local.learning.common.CardContext
+import local.learning.common.models.LockGuid
 import local.learning.common.models.RequestId
 import local.learning.common.models.WorkMode
 import local.learning.common.models.bank.BankGuid
@@ -14,8 +15,6 @@ import local.learning.mappers.exceptions.UnknownRequestClass
 private fun IRequestDto?.requestId() = this?.requestId?.let { RequestId(it) } ?: RequestId.NONE
 
 private fun String?.toBankGuid() = this?.let { BankGuid(it) } ?: BankGuid.NONE
-private fun String?.toCardGuid() = this?.let { CardGuid(it) } ?: CardGuid.NONE
-private fun String?.toCardWithGuId() = Card(guid = this.toCardGuid())
 
 @Suppress("unused")
 fun CardContext.fromTransport(request: IRequestDto) = when (request) {
@@ -39,7 +38,7 @@ fun CardContext.fromTransport(request: CardReadRequestDto) {
     workMode = request.workMode?.toInternalWorkMode() ?: WorkMode.PROD
     stubCase = request.workMode?.toInternalStubCase() ?: CardStubCase.NONE
     command = CardCommand.READ
-    cardRequest = request.guid.toCardWithGuId()
+    cardRequest = Card(guid = request.guid?.let { CardGuid(it) } ?: CardGuid.NONE)
 }
 
 fun CardContext.fromTransport(request: CardUpdateRequestDto) {
@@ -55,17 +54,20 @@ fun CardContext.fromTransport(request: CardDeleteRequestDto) {
     workMode = request.workMode?.toInternalWorkMode() ?: WorkMode.PROD
     stubCase = request.workMode?.toInternalStubCase() ?: CardStubCase.NONE
     command = CardCommand.DELETE
-    cardRequest = request.guid.toCardWithGuId()
+    cardRequest = Card(
+        guid = request.guid?.let { CardGuid(it) } ?: CardGuid.NONE,
+        lockGuid = request.lock?.let { LockGuid(it) } ?: LockGuid.NONE
+    )
 }
 
-private fun CardRequestWorkModeDto.toInternalWorkMode(): WorkMode = when(this.mode) {
+private fun CardRequestWorkModeDto.toInternalWorkMode(): WorkMode = when (this.mode) {
     CardRequestWorkModeDto.Mode.PROD -> WorkMode.PROD
     CardRequestWorkModeDto.Mode.TEST -> WorkMode.TEST
     CardRequestWorkModeDto.Mode.STUB -> WorkMode.STUB
     else -> WorkMode.PROD
 }
 
-private fun CardRequestWorkModeDto.toInternalStubCase(): CardStubCase = when(this.stubCase) {
+private fun CardRequestWorkModeDto.toInternalStubCase(): CardStubCase = when (this.stubCase) {
     CardRequestWorkModeDto.StubCase.SUCCESS -> CardStubCase.SUCCESS
     CardRequestWorkModeDto.StubCase.BAD_GUID -> CardStubCase.VALIDATION_ERROR_BAD_GUID
     CardRequestWorkModeDto.StubCase.BAD_NUMBER -> CardStubCase.VALIDATION_ERROR_BAD_NUMBER
@@ -90,6 +92,7 @@ private fun CardObjectDto.toInternal(): Card {
         number = this.number ?: "",
         validFor = this.validFor ?: "",
         owner = this.owner ?: "",
-        bankGuid = BankGuid(this.bank?.guid ?: "")
+        bankGuid = this.bank?.guid?.let { BankGuid(it) } ?: BankGuid.NONE,
+        lockGuid = this.lock?.let { LockGuid(it) } ?: LockGuid.NONE
     )
 }

@@ -3,6 +3,7 @@ package local.learning.mappers
 import local.learning.api.models.*
 import local.learning.common.CardContext
 import local.learning.common.models.Error
+import local.learning.common.models.LockGuid
 import local.learning.common.models.State
 import local.learning.common.models.card.Card
 import local.learning.common.models.card.CardCommand
@@ -56,7 +57,8 @@ private fun Card.toTransport(): CardObjectDto = CardObjectDto(
     owner = owner.takeIf { it.isNotBlank() },
     bank = BankObjectDto(
         guid = bankGuid.asString()
-    )
+    ),
+    lock = lockGuid.takeIf { it != LockGuid.NONE }?.asString()
 )
 
 private fun List<Error>.toTransportErrors(): List<ResponseErrorDto> = this

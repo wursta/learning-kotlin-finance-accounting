@@ -12,6 +12,10 @@ ExpenseAmount:
   format: 'double'
   minimum: 0
   exclusiveMinimum: true
+ExpenseLockGUID:
+  type: string
+  description: GUID блокировки
+  format: uuid
 
 ExpenseFilter:
   type: object
@@ -56,6 +60,8 @@ ExpenseObject:
       $ref: './Card.yaml#/CardGUID'
     category:
       $ref: './Category.yaml#/CategoryGUID'
+    lock:
+      $ref: './Expense.yaml#/ExpenseLockGUID'
 
 ExpenseResponseSingle:
   allOf:

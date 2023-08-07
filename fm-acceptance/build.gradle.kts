@@ -13,6 +13,7 @@ dependencies {
 
     // Project
     implementation(project(":fm-api"))
+    implementation(project(":fm-repo-arcadedb"))
 
 
     // Tests

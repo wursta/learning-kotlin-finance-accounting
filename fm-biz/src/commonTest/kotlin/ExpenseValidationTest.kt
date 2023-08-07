@@ -4,14 +4,17 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import local.learning.common.CorSettings
 import local.learning.common.ExpenseContext
 import local.learning.common.errors.ErrorCode
 import local.learning.common.errors.ErrorGroup
+import local.learning.common.models.LockGuid
 import local.learning.common.models.State
 import local.learning.common.models.WorkMode
 import local.learning.common.models.card.CardGuid
 import local.learning.common.models.category.CategoryGuid
 import local.learning.common.models.expense.*
+import local.learning.repo.inmemory.ExpenseInMemoryRepository
 import java.math.BigDecimal
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,13 +22,28 @@ import kotlin.test.assertNotEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ExpenseValidationTest {
-    private val processor = ExpenseProcessor()
+    private val processor = ExpenseProcessor(
+        CorSettings(
+            expenseRepoTest = ExpenseInMemoryRepository(
+                initObjects = listOf(
+                    Expense(
+                        guid = ExpenseGuid("1598044e-5259-11e9-8647-d663bd873d93"),
+                        createDT = Clock.System.now(),
+                        amount = BigDecimal(1234.56),
+                        cardGuid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93"),
+                        categoryGuid = CategoryGuid("5410bdaf-834a-4ca6-9044-ee25d5a7164c"),
+                        lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
+                    )
+                )
+            )
+        )
+    )
 
     @Test
     fun createValid() = runTest {
         val ctx = ExpenseContext(
             command = ExpenseCommand.CREATE,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             expenseRequest = Expense(
                 createDT = Clock.System.now(),
                 amount = BigDecimal(1234.56),
@@ -45,7 +63,7 @@ class ExpenseValidationTest {
     fun createInvalid() = runTest {
         val ctx = ExpenseContext(
             command = ExpenseCommand.CREATE,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             expenseRequest = Expense(
                 createDT = Clock.System.now(),
                 amount = BigDecimal(0),
@@ -76,7 +94,7 @@ class ExpenseValidationTest {
     fun readValid() = runTest {
         val ctx = ExpenseContext(
             command = ExpenseCommand.READ,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             expenseRequest = Expense(
                 guid = ExpenseGuid("1598044e-5259-11e9-8647-d663bd873d93")
             )
@@ -93,7 +111,7 @@ class ExpenseValidationTest {
     fun readInvalid() = runTest {
         val ctx = ExpenseContext(
             command = ExpenseCommand.READ,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             expenseRequest = Expense(
                 guid = ExpenseGuid("wrong guid")
             )
@@ -113,13 +131,14 @@ class ExpenseValidationTest {
     fun updateValid() = runTest {
         val ctx = ExpenseContext(
             command = ExpenseCommand.UPDATE,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             expenseRequest = Expense(
                 guid = ExpenseGuid("1598044e-5259-11e9-8647-d663bd873d93"),
                 createDT = Clock.System.now(),
                 amount = BigDecimal(1234.56),
                 cardGuid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93"),
-                categoryGuid = CategoryGuid("5410bdaf-834a-4ca6-9044-ee25d5a7164c")
+                categoryGuid = CategoryGuid("5410bdaf-834a-4ca6-9044-ee25d5a7164c"),
+                lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
             )
         )
 
@@ -134,7 +153,7 @@ class ExpenseValidationTest {
     fun updateInvalid() = runTest {
         val ctx = ExpenseContext(
             command = ExpenseCommand.UPDATE,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             expenseRequest = Expense(
                 guid = ExpenseGuid("wrong guid"),
                 createDT = Clock.System.now(),
@@ -170,9 +189,10 @@ class ExpenseValidationTest {
     fun deleteValid() = runTest {
         val ctx = ExpenseContext(
             command = ExpenseCommand.DELETE,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             expenseRequest = Expense(
-                guid = ExpenseGuid("1598044e-5259-11e9-8647-d663bd873d93")
+                guid = ExpenseGuid("1598044e-5259-11e9-8647-d663bd873d93"),
+                lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
             )
         )
 
@@ -187,7 +207,7 @@ class ExpenseValidationTest {
     fun deleteInvalid() = runTest {
         val ctx = ExpenseContext(
             command = ExpenseCommand.DELETE,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             expenseRequest = Expense(
                 guid = ExpenseGuid("wrong guid")
             )
@@ -207,7 +227,7 @@ class ExpenseValidationTest {
     fun searchValid() = runTest {
         val ctx = ExpenseContext(
             command = ExpenseCommand.SEARCH,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             expenseSearchRequest = ExpenseSearchFilter(
                 amountFrom = BigDecimal.valueOf(100),
                 amountTo = BigDecimal.valueOf(200),
@@ -231,7 +251,7 @@ class ExpenseValidationTest {
     fun searchInvalid() = runTest {
         val ctx = ExpenseContext(
             command = ExpenseCommand.SEARCH,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             expenseSearchRequest = ExpenseSearchFilter(
                 amountFrom = BigDecimal.valueOf(200),
                 amountTo = BigDecimal.valueOf(100),
@@ -274,7 +294,7 @@ class ExpenseValidationTest {
     fun statisticValid() = runTest {
         val ctx = ExpenseContext(
             command = ExpenseCommand.STATS,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             expenseStatisticRequest = ExpenseStatisticFilter(
                 dateFrom = Instant.parse("2023-01-01T14:46:04Z"),
                 dateTo = Instant.parse("2023-01-02T14:46:04Z"),
@@ -292,7 +312,7 @@ class ExpenseValidationTest {
     fun statisticInvalid() = runTest {
         val ctx = ExpenseContext(
             command = ExpenseCommand.STATS,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             expenseStatisticRequest = ExpenseStatisticFilter(
                 dateFrom = Instant.parse("2023-01-02T14:46:04Z"),
                 dateTo = Instant.parse("2023-01-01T14:46:04Z"),

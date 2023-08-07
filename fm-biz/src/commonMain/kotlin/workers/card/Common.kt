@@ -10,3 +10,12 @@ fun CorChainDsl<CardContext>.init(title: String) = worker {
     on { state == State.NONE }
     handle { state = State.RUNNING }
 }
+
+fun CorChainDsl<CardContext>.prepareResponse() = worker {
+    this.title = "Подготовка ответа"
+    on { state == State.RUNNING }
+    handle {
+        cardResponse = cardRepoResult.copy()
+        state = State.FINISHING
+    }
+}

@@ -6,6 +6,7 @@ import local.learning.common.ExpenseContext
 import local.learning.common.INSTANT_NEGATIVE_INFINITY
 import local.learning.common.INSTANT_NONE
 import local.learning.common.INSTANT_POSITIVE_INFINITY
+import local.learning.common.models.LockGuid
 import local.learning.common.models.RequestId
 import local.learning.common.models.WorkMode
 import local.learning.common.models.card.CardGuid
@@ -19,6 +20,7 @@ private fun String?.toExpenseGuid() = this?.let { ExpenseGuid(it) } ?: ExpenseGu
 private fun String?.toExpenseWithGuId() = Expense(guid = this.toExpenseGuid())
 private fun String?.toCardGuid() = this?.let { CardGuid(it) } ?: CardGuid.NONE
 private fun String?.toCategoryGuid() = this?.let { CategoryGuid(it) } ?: CategoryGuid.NONE
+private fun String?.toLockGuid() = this?.let { LockGuid(it) } ?: LockGuid.NONE
 private fun String?.toInternalSourceGuid(): CardGuid = this?.let { CardGuid(it) } ?: CardGuid.NONE
 private fun List<String?>.toInternalSourcesGuidsList(): List<CardGuid>? = this
     .map { it.toInternalSourceGuid() }
@@ -64,7 +66,10 @@ fun ExpenseContext.fromTransport(request: ExpenseDeleteRequestDto) {
     workMode = request.workMode?.toInternalWorkMode() ?: WorkMode.PROD
     stubCase = request.workMode?.toInternalStubCase() ?: ExpenseStubCase.NONE
     command = ExpenseCommand.DELETE
-    expenseRequest = request.guid.toExpenseWithGuId()
+    expenseRequest = Expense(
+        guid = request.guid.toExpenseGuid(),
+        lockGuid = request.lock.toLockGuid()
+    )
 }
 
 fun ExpenseContext.fromTransport(request: ExpenseSearchRequestDto) {
@@ -128,6 +133,7 @@ private fun ExpenseObjectDto.toInternal(): Expense {
         createDT = createDt?.let { Instant.parse(it) } ?: INSTANT_NONE,
         amount = this.amount.takeIf { it != null }?.let { BigDecimal(it) } ?: BigDecimal.ZERO,
         cardGuid = this.card.toCardGuid(),
-        categoryGuid = this.category.toCategoryGuid()
+        categoryGuid = this.category.toCategoryGuid(),
+        lockGuid = this.lock.toLockGuid()
     )
 }

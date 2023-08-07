@@ -496,6 +496,8 @@ components:
               $ref: '#/components/schemas/CardRequestWorkMode'
             guid:
               $ref: './schemas/Card.yaml#/CardGUID'
+            lock:
+              $ref: './schemas/Card.yaml#/CardLockGUID'
 
     CardDeleteResponse:
       allOf:
@@ -560,6 +562,8 @@ components:
               $ref: '#/components/schemas/ExpenseRequestWorkMode'
             guid:
               $ref: './schemas/Expense.yaml#/ExpenseGUID'
+            lock:
+              $ref: './schemas/Expense.yaml#/ExpenseLockGUID'
 
     ExpenseDeleteResponse:
       allOf:

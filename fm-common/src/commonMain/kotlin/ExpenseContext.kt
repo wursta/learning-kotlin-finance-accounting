@@ -6,6 +6,7 @@ import local.learning.common.models.RequestId
 import local.learning.common.models.State
 import local.learning.common.models.WorkMode
 import local.learning.common.models.expense.*
+import local.learning.common.repo.IExpenseRepository
 
 data class ExpenseContext(
     // Request
@@ -18,6 +19,12 @@ data class ExpenseContext(
     var command: ExpenseCommand = ExpenseCommand.NONE,
     var stubCase: ExpenseStubCase = ExpenseStubCase.NONE,
 
+    //COR settings
+    var corSettings: CorSettings = CorSettings.NONE,
+
+    // Repo
+    var repo: IExpenseRepository = IExpenseRepository.NONE,
+
     // Requests & Responses
     var expenseRequest: Expense = Expense(),
     var expenseResponse: Expense = Expense(),
@@ -29,5 +36,10 @@ data class ExpenseContext(
     // Validation
     var expenseValidating: Expense = Expense(),
     var expenseSearchValidating: ExpenseSearchFilter = ExpenseSearchFilter(),
-    var expenseStatisticValidating: ExpenseStatisticFilter = ExpenseStatisticFilter()
-): IContext
+    var expenseStatisticValidating: ExpenseStatisticFilter = ExpenseStatisticFilter(),
+
+    // Repo results
+    var expenseRepoResult: Expense = Expense(),
+    var expenseSearchRepoResult: List<Expense> = listOf(),
+    var expenseStatisticRepoResult: ExpenseStatistic = ExpenseStatistic()
+) : IContext

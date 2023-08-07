@@ -5,6 +5,8 @@ import kotlinx.datetime.toLocalDateTime
 import local.learning.api.models.*
 import local.learning.common.ExpenseContext
 import local.learning.common.models.Error
+import local.learning.common.models.LockGuid
+import local.learning.common.models.State
 import local.learning.common.models.card.CardGuid
 import local.learning.common.models.category.Category
 import local.learning.common.models.category.CategoryGuid
@@ -28,7 +30,7 @@ fun ExpenseContext.toTransport(): IResponseDto = when (val cmd = command) {
 fun ExpenseContext.toTransportCreate() = ExpenseCreateResponseDto(
     responseType = "expenseCreate",
     requestId = this.requestId.asString().takeIf { it.isNotBlank() },
-    result = ResponseResultDto.SUCCESS,
+    result = if (state == State.FAILING) ResponseResultDto.ERROR else ResponseResultDto.SUCCESS,
     errors = errors.toTransportErrors(),
     expense = expenseResponse.toTransport()
 )
@@ -36,7 +38,7 @@ fun ExpenseContext.toTransportCreate() = ExpenseCreateResponseDto(
 fun ExpenseContext.toTransportRead() = ExpenseReadResponseDto(
     responseType = "expenseRead",
     requestId = this.requestId.asString().takeIf { it.isNotBlank() },
-    result = ResponseResultDto.SUCCESS,
+    result = if (state == State.FAILING) ResponseResultDto.ERROR else ResponseResultDto.SUCCESS,
     errors = errors.toTransportErrors(),
     expense = expenseResponse.toTransport()
 )
@@ -44,7 +46,7 @@ fun ExpenseContext.toTransportRead() = ExpenseReadResponseDto(
 fun ExpenseContext.toTransportUpdate() = ExpenseUpdateResponseDto(
     responseType = "expenseUpdate",
     requestId = this.requestId.asString().takeIf { it.isNotBlank() },
-    result = ResponseResultDto.SUCCESS,
+    result = if (state == State.FAILING) ResponseResultDto.ERROR else ResponseResultDto.SUCCESS,
     errors = errors.toTransportErrors(),
     expense = expenseResponse.toTransport()
 )
@@ -52,7 +54,7 @@ fun ExpenseContext.toTransportUpdate() = ExpenseUpdateResponseDto(
 fun ExpenseContext.toTransportDelete() = ExpenseDeleteResponseDto(
     responseType = "expenseDelete",
     requestId = this.requestId.asString().takeIf { it.isNotBlank() },
-    result = ResponseResultDto.SUCCESS,
+    result = if (state == State.FAILING) ResponseResultDto.ERROR else ResponseResultDto.SUCCESS,
     errors = errors.toTransportErrors(),
     expense = expenseResponse.toTransport()
 )
@@ -60,7 +62,7 @@ fun ExpenseContext.toTransportDelete() = ExpenseDeleteResponseDto(
 fun ExpenseContext.toTransportSearch() = ExpenseSearchResponseDto(
     responseType = "expensesSearch",
     requestId = this.requestId.asString().takeIf { it.isNotBlank() },
-    result = ResponseResultDto.SUCCESS,
+    result = if (state == State.FAILING) ResponseResultDto.ERROR else ResponseResultDto.SUCCESS,
     errors = errors.toTransportErrors(),
     expenses = expenseSearchResponse.toExpensesListTransport()
 )
@@ -68,7 +70,7 @@ fun ExpenseContext.toTransportSearch() = ExpenseSearchResponseDto(
 fun ExpenseContext.toTransportStats() = ExpenseStatsResponseDto(
     responseType = "expensesStats",
     requestId = this.requestId.asString().takeIf { it.isNotBlank() },
-    result = ResponseResultDto.SUCCESS,
+    result = if (state == State.FAILING) ResponseResultDto.ERROR else ResponseResultDto.SUCCESS,
     errors = errors.toTransportErrors(),
     total = expenseStatisticResponse.total.toDouble(),
     summary = expenseStatisticResponse.summaryByCategory.toExpensesSummaryByCategoryTransport()
@@ -80,6 +82,7 @@ private fun Expense.toTransport(): ExpenseObjectDto = ExpenseObjectDto(
     amount = amount.takeIf { it != BigDecimal.ZERO }?.toDouble(),
     card = cardGuid.takeIf { it != CardGuid.NONE }?.asString(),
     category = categoryGuid.takeIf { it != CategoryGuid.NONE }?.asString(),
+    lock = lockGuid.takeIf { it != LockGuid.NONE }?.asString(),
 )
 
 private fun Category.toTransport(): CategoryObjectDto = CategoryObjectDto(

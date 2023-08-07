@@ -3,14 +3,17 @@ package local.learning.app.biz
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import local.learning.common.CardContext
+import local.learning.common.CorSettings
 import local.learning.common.errors.ErrorCode
 import local.learning.common.errors.ErrorGroup
+import local.learning.common.models.LockGuid
 import local.learning.common.models.State
 import local.learning.common.models.WorkMode
 import local.learning.common.models.bank.BankGuid
 import local.learning.common.models.card.Card
 import local.learning.common.models.card.CardCommand
 import local.learning.common.models.card.CardGuid
+import local.learning.repo.inmemory.CardInMemoryRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -18,14 +21,29 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CardValidationTest {
-    private val processor = CardProcessor()
+    private val processor = CardProcessor(
+        CorSettings(
+            cardRepoTest = CardInMemoryRepository(
+                initObjects = listOf(
+                    Card(
+                        guid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93"),
+                        number = "0000000000000000",
+                        owner = "   SAZONOV MIKHAIL   ",
+                        validFor = "2023-01",
+                        bankGuid = BankGuid("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                        lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
+                    )
+                )
+            )
+        )
+    )
 
     @Test
     fun createValid() = runTest {
         val ctx = CardContext(
             command = CardCommand.CREATE,
             state = State.NONE,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             cardRequest = Card(
                 number = "0000000000000000",
                 owner = "   SAZONOV MIKHAIL   ",
@@ -65,7 +83,7 @@ class CardValidationTest {
             val ctx = CardContext(
                 command = CardCommand.CREATE,
                 state = State.NONE,
-                workMode = WorkMode.PROD,
+                workMode = WorkMode.TEST,
                 cardRequest = it
             )
 
@@ -98,9 +116,9 @@ class CardValidationTest {
         val ctx = CardContext(
             command = CardCommand.READ,
             state = State.NONE,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             cardRequest = Card(
-                guid = CardGuid("3fa85f64-5717-4562-b3fc-2c963f66afa6")
+                guid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93")
             )
         )
 
@@ -115,7 +133,7 @@ class CardValidationTest {
         val ctx = CardContext(
             command = CardCommand.READ,
             state = State.NONE,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             cardRequest = Card(
                 guid = CardGuid("wrong number"),
             )
@@ -137,13 +155,14 @@ class CardValidationTest {
         val ctx = CardContext(
             command = CardCommand.UPDATE,
             state = State.NONE,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             cardRequest = Card(
                 guid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93"),
-                number = "0000000000000000",
+                number = "0000000000000001",
                 owner = "   SAZONOV MIKHAIL   ",
                 validFor = "2023-01",
-                bankGuid = BankGuid("3fa85f64-5717-4562-b3fc-2c963f66afa6")
+                bankGuid = BankGuid("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
             )
         )
 
@@ -181,7 +200,7 @@ class CardValidationTest {
             val ctx = CardContext(
                 command = CardCommand.UPDATE,
                 state = State.NONE,
-                workMode = WorkMode.PROD,
+                workMode = WorkMode.TEST,
                 cardRequest = it
             )
 
@@ -218,14 +237,15 @@ class CardValidationTest {
         val ctx = CardContext(
             command = CardCommand.DELETE,
             state = State.NONE,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             cardRequest = Card(
-                guid = CardGuid("3fa85f64-5717-4562-b3fc-2c963f66afa6")
+                guid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93"),
+                lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
             )
         )
 
         processor.exec(ctx)
-
+        println(ctx)
         assertTrue { ctx.errors.size == 0 }
         assertNotEquals(State.FAILING, ctx.state)
     }
@@ -235,7 +255,7 @@ class CardValidationTest {
         val ctx = CardContext(
             command = CardCommand.DELETE,
             state = State.NONE,
-            workMode = WorkMode.PROD,
+            workMode = WorkMode.TEST,
             cardRequest = Card(
                 guid = CardGuid("wrong number"),
             )

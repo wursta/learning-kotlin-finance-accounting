@@ -1,5 +1,3 @@
-@file:Suppress("UNUSED_VARIABLE")
-
 import org.jetbrains.kotlin.util.suffixIfNot
 
 val ktorVersion: String by project
@@ -58,9 +56,9 @@ kotlin {
                 implementation(project(":fm-mappers"))
                 implementation(project(":fm-biz"))
                 implementation(project(":fm-app-logging-kermit"))
-
-                // Stubs
                 implementation(project(":fm-stubs"))
+                implementation(project(":fm-repo-inmemory"))
+                implementation(project(":fm-repo-arcadedb"))
             }
         }
 

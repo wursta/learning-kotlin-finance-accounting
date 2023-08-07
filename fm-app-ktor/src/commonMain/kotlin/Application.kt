@@ -1,5 +1,7 @@
 package local.learning.app.ktor
 
+import CardArcadeDbRepository
+import ExpenseArcadeDbRepository
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -19,15 +21,43 @@ import local.learning.app.ktor.routing.card
 import local.learning.app.ktor.routing.expense
 import local.learning.common.CorSettings
 import local.learning.common.log.LoggerProvider
+import local.learning.repo.inmemory.CardInMemoryRepository
+import local.learning.repo.inmemory.ExpenseInMemoryRepository
 
 expect fun Application.getLoggerProviderConf(): LoggerProvider
-fun Application.initAppSettings(): ApplicationSettings = ApplicationSettings(
-    corSettings = CorSettings(
-        loggerProvider = getLoggerProviderConf()
-    ),
-    cardProcessor = CardProcessor(),
-    expenseProcessor = ExpenseProcessor(),
-)
+fun Application.initAppSettings(): ApplicationSettings {
+    val arcadeDbHost = environment.config.property("arcadeDb.host").getString()
+    val arcadeDbPort = environment.config.property("arcadeDb.port").getString().toInt()
+    val arcadeDbName = environment.config.property("arcadeDb.dbName").getString()
+    val arcadeDbUserName = environment.config.property("arcadeDb.user").getString()
+    val arcadeDbUserPass = environment.config.property("arcadeDb.pass").getString()
+
+    val corSettings = CorSettings(
+        loggerProvider = getLoggerProviderConf(),
+        cardRepoTest = CardInMemoryRepository(),
+        cardRepoProd = CardArcadeDbRepository(
+            host = arcadeDbHost,
+            port = arcadeDbPort,
+            dbName = arcadeDbName,
+            userName = arcadeDbUserName,
+            userPassword = arcadeDbUserPass
+        ),
+        expenseRepoTest = ExpenseInMemoryRepository(),
+        expenseRepoProd = ExpenseArcadeDbRepository(
+            host = arcadeDbHost,
+            port = arcadeDbPort,
+            dbName = arcadeDbName,
+            userName = arcadeDbUserName,
+            userPassword = arcadeDbUserPass
+        )
+    )
+
+    return ApplicationSettings(
+        corSettings = corSettings,
+        cardProcessor = CardProcessor(corSettings),
+        expenseProcessor = ExpenseProcessor(corSettings),
+    )
+}
 
 fun Application.mainModule(
     appSettings: ApplicationSettings = initAppSettings()
