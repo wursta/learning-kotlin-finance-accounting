@@ -16,6 +16,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class ExpenseStubTest {
+    private val testUserLogin = "msazonov"
+    private val testUserPassword = "qwerty"
     private val expenseStub: Expense = ExpenseStub.get()
     private val expensesListStub: List<Expense> = ExpenseStub.getList()
     private val expensesStatsStub: ExpenseStatistic = ExpenseStub.getStatistic()
@@ -36,6 +38,7 @@ class ExpenseStubTest {
                 )
             )
             contentType(ContentType.Application.Json)
+            basicAuth(testUserLogin, testUserPassword)
             val requestJson = jsonSerializer.encodeToString(requestObj)
             setBody(requestJson)
         }
@@ -64,6 +67,7 @@ class ExpenseStubTest {
                 guid = expenseStub.guid.asString()
             )
             contentType(ContentType.Application.Json)
+            basicAuth(testUserLogin, testUserPassword)
             val requestJson = jsonSerializer.encodeToString(requestObj)
             setBody(requestJson)
         }
@@ -97,6 +101,7 @@ class ExpenseStubTest {
                 )
             )
             contentType(ContentType.Application.Json)
+            basicAuth(testUserLogin, testUserPassword)
             val requestJson = jsonSerializer.encodeToString(requestObj)
             setBody(requestJson)
         }
@@ -125,6 +130,7 @@ class ExpenseStubTest {
                 guid = expenseStub.guid.asString()
             )
             contentType(ContentType.Application.Json)
+            basicAuth(testUserLogin, testUserPassword)
             val requestJson = jsonSerializer.encodeToString(requestObj)
             setBody(requestJson)
         }
@@ -153,6 +159,7 @@ class ExpenseStubTest {
                 amountFrom = 100.00
             )
             contentType(ContentType.Application.Json)
+            basicAuth(testUserLogin, testUserPassword)
             val requestJson = jsonSerializer.encodeToString(requestObj)
             setBody(requestJson)
         }
@@ -186,6 +193,7 @@ class ExpenseStubTest {
                 ),
             )
             contentType(ContentType.Application.Json)
+            basicAuth(testUserLogin, testUserPassword)
             val requestJson = jsonSerializer.encodeToString(requestObj)
             setBody(requestJson)
         }
