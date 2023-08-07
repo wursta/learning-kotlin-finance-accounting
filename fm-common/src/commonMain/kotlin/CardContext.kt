@@ -1,12 +1,10 @@
 package local.learning.common
 
 import kotlinx.datetime.Instant
-import local.learning.common.models.Error
-import local.learning.common.models.RequestId
-import local.learning.common.models.State
-import local.learning.common.models.WorkMode
+import local.learning.common.models.*
 import local.learning.common.models.card.Card
 import local.learning.common.models.card.CardCommand
+import local.learning.common.models.card.CardPermission
 import local.learning.common.models.card.CardStubCase
 import local.learning.common.repo.ICardRepository
 
@@ -23,6 +21,11 @@ data class CardContext(
 
     //COR settings
     var corSettings: CorSettings = CorSettings.NONE,
+
+    // Access
+    var principal: Principal = Principal.NONE,
+    val permissions: MutableSet<CardPermission> = mutableSetOf(),
+    var permitted: Boolean = false,
 
     // Repo
     var repo: ICardRepository = ICardRepository.NONE,

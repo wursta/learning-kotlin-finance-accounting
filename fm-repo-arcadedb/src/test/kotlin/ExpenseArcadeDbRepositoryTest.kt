@@ -1,3 +1,6 @@
+package local.learning.repo.arcadedb
+
+import ArcadeDbContainer
 import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -30,11 +33,13 @@ class ExpenseArcadeDbRepositoryTest {
         val userPassword = ArcadeDbContainer.password
 
         repo = ExpenseArcadeDbRepository(
-            host = host,
-            port = port,
-            dbName = dbName,
-            userName = userName,
-            userPassword = userPassword
+            settings = ArcadeDbSettings(
+                host = host,
+                port = port,
+                dbName = dbName,
+                userName = userName,
+                userPassword = userPassword
+            )
         )
 
         ArcadeDbSchema.initialize(host, port, dbName, userName, userPassword)
@@ -172,7 +177,7 @@ class ExpenseArcadeDbRepositoryTest {
                 createDT = Instant.parse("2023-05-10T11:43:03Z"),
                 amount = BigDecimal(1113.44),
                 cardGuid = CardGuid(randomUuid()),
-                categoryGuid =  CategoryGuid(randomUuid()),
+                categoryGuid = CategoryGuid(randomUuid()),
                 lockGuid = LockGuid("invalid lock")
             )
         )
@@ -189,7 +194,8 @@ class ExpenseArcadeDbRepositoryTest {
             amountFrom = BigDecimal.ZERO,
             amountTo = BigDecimal(200),
             dateFrom = null,
-            dateTo = null
+            dateTo = null,
+            createdBy = null
         )
 
         val resultAmountCase = repo.search(searchAmountCaseRequest)
@@ -203,6 +209,7 @@ class ExpenseArcadeDbRepositoryTest {
             amountTo = null,
             dateFrom = Instant.parse("2023-01-01T00:00:00Z"),
             dateTo = Instant.parse("2023-01-02T23:59:59Z"),
+            createdBy = null
         )
 
         val resultDatesCase = repo.search(searchDatesCaseRequest)
@@ -216,7 +223,8 @@ class ExpenseArcadeDbRepositoryTest {
     fun stats() = runTest {
         val request = DbExpenseStatisticRequest(
             dateFrom = Instant.parse("2023-01-01T00:00:00Z"),
-            dateTo = Instant.parse("2023-01-03T23:59:59Z")
+            dateTo = Instant.parse("2023-01-03T23:59:59Z"),
+            createdBy = null
         )
 
         val result = repo.stats(request)

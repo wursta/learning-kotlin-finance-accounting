@@ -98,6 +98,10 @@ class CardProcessor(val corSettings: CorSettings = CorSettings.NONE) : IProcesso
                     validateBankGuid("Проверка формата guid банка")
                 }
 
+                access {
+                    collectPermissions("Вычисление разрешений для пользователя")
+                    validateAccess("Проверка прав доступа")
+                }
 
                 repoCreate()
                 prepareResponse()
@@ -111,7 +115,12 @@ class CardProcessor(val corSettings: CorSettings = CorSettings.NONE) : IProcesso
                     validateGuid("Проверка формата guid карты")
                 }
 
-                repoRead()
+                access {
+                    collectPermissions("Вычисление разрешений для пользователя")
+                    repoRead()
+                    validateAccess("Проверка прав доступа")
+                }
+
                 prepareResponse()
             }
 
@@ -128,6 +137,12 @@ class CardProcessor(val corSettings: CorSettings = CorSettings.NONE) : IProcesso
                     validateBankGuid("Проверка формата guid банка")
                 }
 
+                access {
+                    collectPermissions("Вычисление разрешений для пользователя")
+                    repoRead()
+                    validateAccess("Проверка прав доступа")
+                }
+
                 repoUpdate()
                 prepareResponse()
             }
@@ -138,6 +153,12 @@ class CardProcessor(val corSettings: CorSettings = CorSettings.NONE) : IProcesso
                 validation {
                     worker("Копируем поля в cardValidating") { cardValidating = cardRequest.copy() }
                     validateGuid("Проверка формата guid карты")
+                }
+
+                access {
+                    collectPermissions("Вычисление разрешений для пользователя")
+                    repoRead()
+                    validateAccess("Проверка прав доступа")
                 }
 
                 repoDelete()

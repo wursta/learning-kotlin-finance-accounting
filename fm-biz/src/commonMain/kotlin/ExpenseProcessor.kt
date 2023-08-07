@@ -97,6 +97,11 @@ class ExpenseProcessor(val corSettings: CorSettings = CorSettings.NONE): IProces
                     validateCategoryGuid("Проверка формата guid категории")
                 }
 
+                access {
+                    collectPermissions("Вычисление разрешений для пользователя")
+                    validateAccess("Проверка прав доступа")
+                }
+
                 repoCreate()
                 prepareExpenseResult()
             }
@@ -110,7 +115,12 @@ class ExpenseProcessor(val corSettings: CorSettings = CorSettings.NONE): IProces
                     validateGuid("Проверка guid траты")
                 }
 
-                repoRead()
+                access {
+                    collectPermissions("Вычисление разрешений для пользователя")
+                    repoRead()
+                    validateAccess("Проверка прав доступа")
+                }
+
                 prepareExpenseResult()
             }
 
@@ -126,6 +136,12 @@ class ExpenseProcessor(val corSettings: CorSettings = CorSettings.NONE): IProces
                     validateCategoryGuid("Проверка формата guid категории")
                 }
 
+                access {
+                    collectPermissions("Вычисление разрешений для пользователя")
+                    repoRead()
+                    validateAccess("Проверка прав доступа")
+                }
+
                 repoUpdate()
                 prepareExpenseResult()
             }
@@ -137,6 +153,12 @@ class ExpenseProcessor(val corSettings: CorSettings = CorSettings.NONE): IProces
                     worker("Копируем поля в expenseValidating") { expenseValidating = expenseRequest.copy() }
 
                     validateGuid("Проверка guid траты")
+                }
+
+                access {
+                    collectPermissions("Вычисление разрешений для пользователя")
+                    repoRead()
+                    validateAccess("Проверка прав доступа")
                 }
 
                 repoDelete()
@@ -156,6 +178,10 @@ class ExpenseProcessor(val corSettings: CorSettings = CorSettings.NONE): IProces
                     validateSearchFilterSources("Проверка фильтра поиска sources")
                 }
 
+                access {
+                    collectPermissions("Вычисление разрешений для пользователя")
+                }
+
                 repoSearch()
                 prepareSearchResult()
             }
@@ -167,6 +193,10 @@ class ExpenseProcessor(val corSettings: CorSettings = CorSettings.NONE): IProces
                     worker("Копируем поля в expenseStatisticValidating") { expenseStatisticValidating = expenseStatisticRequest.copy() }
                     validateStatisticFilterDateFrom("Проверка фильтра стратистики date_from")
                     validateStatisticFilterDateTo("Проверка фильтра стратистики date_to")
+                }
+
+                access {
+                    collectPermissions("Вычисление разрешений для пользователя")
                 }
 
                 repoStatistic()

@@ -1,3 +1,5 @@
+package local.learning.repo.arcadedb
+
 import com.arcadedb.query.sql.executor.EmptyResult
 import com.arcadedb.remote.RemoteDatabase
 import com.benasher44.uuid.uuid4
@@ -16,15 +18,11 @@ import local.learning.common.repo.expense.*
 import java.math.BigDecimal
 
 class ExpenseArcadeDbRepository(
-    private val host: String,
-    private val port: Int,
-    private val dbName: String,
-    private val userName: String,
-    private val userPassword: String,
+    private val settings: ArcadeDbSettings,
     val randomUuid: () -> String = { uuid4().toString() }
 ) : IExpenseRepository {
     private val db by lazy {
-        RemoteDatabase(host, port, dbName, userName, userPassword)
+        RemoteDatabase(settings.host, settings.port, settings.dbName, settings.userName, settings.userPassword)
     }
 
     fun initRepo(vararg expenses: Expense) {
@@ -37,44 +35,24 @@ class ExpenseArcadeDbRepository(
                         "amount = :amount, " +
                         "cardGuid = :cardGuid, " +
                         "categoryGuid = :categoryGuid, " +
-                        "lockGuid = :lockGuid",
+                        "lockGuid = :lockGuid, " +
+                        "createdBy = :createdBy",
+
                 hashMapOf(
                     Pair("guid", expense.guid.asString()),
                     Pair("createDT", expense.createDT.toEpochMilliseconds()),
                     Pair("amount", expense.amount.toDouble()),
                     Pair("cardGuid", expense.cardGuid.asString()),
                     Pair("categoryGuid", expense.categoryGuid.asString()),
-                    Pair("lockGuid", expense.lockGuid.asString())
+                    Pair("lockGuid", expense.lockGuid.asString()),
+                    Pair("createdBy", expense.createdBy.asString())
                 )
             )
         }
     }
-
-    override suspend fun create(request: DbExpenseRequest): DbExpenseResponse {
-        val key = randomUuid()
-        val expense = request.expense.copy(guid = ExpenseGuid(key), lockGuid = LockGuid(randomUuid()))
-
+    private fun withDbErrorHandler(block:  () -> DbExpenseResponse): DbExpenseResponse {
         try {
-            val resultSet = db.command(
-                "sql",
-                "CREATE VERTEX expense SET " +
-                        "guid = :guid, " +
-                        "createDT = :createDT, " +
-                        "amount = :amount, " +
-                        "cardGuid = :cardGuid, " +
-                        "categoryGuid = :categoryGuid, " +
-                        "lockGuid = :lockGuid",
-                hashMapOf(
-                    Pair("guid", expense.guid.asString()),
-                    Pair("createDT", expense.createDT.toEpochMilliseconds()),
-                    Pair("amount", expense.amount.toDouble()),
-                    Pair("cardGuid", expense.cardGuid.asString()),
-                    Pair("categoryGuid", expense.categoryGuid.asString()),
-                    Pair("lockGuid", expense.lockGuid.asString())
-                )
-            )
-            val record = resultSet.nextIfAvailable()
-            return DbExpenseResponse(record.toExpenseInternal(), true)
+            return block()
         } catch (e: Throwable) {
             return DbExpenseResponse(
                 null,
@@ -91,10 +69,40 @@ class ExpenseArcadeDbRepository(
         }
     }
 
+    override suspend fun create(request: DbExpenseRequest): DbExpenseResponse {
+        val key = randomUuid()
+        val expense = request.expense.copy(guid = ExpenseGuid(key), lockGuid = LockGuid(randomUuid()))
+
+        return withDbErrorHandler {
+            val resultSet = db.command(
+                "sql",
+                "CREATE VERTEX expense SET " +
+                        "guid = :guid, " +
+                        "createDT = :createDT, " +
+                        "amount = :amount, " +
+                        "cardGuid = :cardGuid, " +
+                        "categoryGuid = :categoryGuid, " +
+                        "lockGuid = :lockGuid, " +
+                        "createdBy = :createdBy",
+                hashMapOf(
+                    Pair("guid", expense.guid.asString()),
+                    Pair("createDT", expense.createDT.toEpochMilliseconds()),
+                    Pair("amount", expense.amount.toDouble()),
+                    Pair("cardGuid", expense.cardGuid.asString()),
+                    Pair("categoryGuid", expense.categoryGuid.asString()),
+                    Pair("lockGuid", expense.lockGuid.asString()),
+                    Pair("createdBy", expense.createdBy.asString())
+                )
+            )
+            val record = resultSet.nextIfAvailable()
+            return@withDbErrorHandler DbExpenseResponse(record.toExpenseInternal(), true)
+        }
+    }
+
     override suspend fun read(request: DbExpenseGuidRequest): DbExpenseResponse {
         val key = request.guid.takeIf { it != ExpenseGuid.NONE }?.asString() ?: return resultErrorEmptyGuid
 
-        try {
+        return withDbErrorHandler {
             val resultSet = db.command(
                 "sql",
                 "SELECT FROM expense WHERE guid = :guid",
@@ -106,23 +114,10 @@ class ExpenseArcadeDbRepository(
             val record = resultSet.nextIfAvailable()
 
             if (record is EmptyResult) {
-                return resultErrorNotFound
+                return@withDbErrorHandler resultErrorNotFound
             }
 
-            return DbExpenseResponse(record.toExpenseInternal(), true)
-        } catch (e: Throwable) {
-            return DbExpenseResponse(
-                null,
-                false,
-                listOf(
-                    Error(
-                        code = ErrorCode.UNKNOWN,
-                        group = ErrorGroup.EXCEPTIONS,
-                        message = e.message.toString(),
-                        exception = e
-                    )
-                )
-            )
+            return@withDbErrorHandler DbExpenseResponse(record.toExpenseInternal(), true)
         }
     }
 
@@ -131,7 +126,7 @@ class ExpenseArcadeDbRepository(
         val lockFromRequest =
             request.expense.lockGuid.takeIf { it != LockGuid.NONE }?.asString() ?: return resultErrorEmptyLock
 
-        try {
+        return withDbErrorHandler {
             val resultSetForUpdate = db.command(
                 "sql",
                 "SELECT FROM expense WHERE guid = :guid",
@@ -143,11 +138,11 @@ class ExpenseArcadeDbRepository(
             val recordForUpdate = resultSetForUpdate.nextIfAvailable()
 
             if (recordForUpdate is EmptyResult) {
-                return resultErrorNotFound
+                return@withDbErrorHandler resultErrorNotFound
             }
 
             if (recordForUpdate.getProperty<String>("lockGuid") != lockFromRequest) {
-                return resultErrorInvalidLock
+                return@withDbErrorHandler resultErrorInvalidLock
             }
 
             val resultSet = db.command(
@@ -174,23 +169,10 @@ class ExpenseArcadeDbRepository(
             val record = resultSet.nextIfAvailable()
 
             if (record is EmptyResult) {
-                return resultErrorInvalidLock
+                return@withDbErrorHandler resultErrorInvalidLock
             }
 
-            return DbExpenseResponse(record.toExpenseInternal(), true)
-        } catch (e: Throwable) {
-            return DbExpenseResponse(
-                null,
-                false,
-                listOf(
-                    Error(
-                        code = ErrorCode.UNKNOWN,
-                        group = ErrorGroup.EXCEPTIONS,
-                        message = e.message.toString(),
-                        exception = e
-                    )
-                )
-            )
+            return@withDbErrorHandler DbExpenseResponse(record.toExpenseInternal(), true)
         }
     }
 
@@ -198,7 +180,7 @@ class ExpenseArcadeDbRepository(
         val key = request.guid.takeIf { it != ExpenseGuid.NONE }?.asString() ?: return resultErrorEmptyGuid
         val lockFromRequest = request.lockGuid.takeIf { it != LockGuid.NONE }?.asString() ?: return resultErrorEmptyLock
 
-        try {
+        return withDbErrorHandler {
             val resultSetForDelete = db.command(
                 "sql",
                 "SELECT FROM expense WHERE guid = :guid",
@@ -210,11 +192,11 @@ class ExpenseArcadeDbRepository(
             val recordForDelete = resultSetForDelete.nextIfAvailable()
 
             if (recordForDelete is EmptyResult) {
-                return resultErrorNotFound
+                return@withDbErrorHandler resultErrorNotFound
             }
 
             if (recordForDelete.getProperty<String>("lockGuid") != lockFromRequest) {
-                return resultErrorInvalidLock
+                return@withDbErrorHandler resultErrorInvalidLock
             }
 
             val resultSet = db.command(
@@ -231,29 +213,20 @@ class ExpenseArcadeDbRepository(
             val record = resultSet.nextIfAvailable()
 
             if (record is EmptyResult) {
-                return resultErrorInvalidLock
+                return@withDbErrorHandler resultErrorInvalidLock
             }
 
-            return DbExpenseResponse(record.toExpenseInternal(), true)
-        } catch (e: Throwable) {
-            return DbExpenseResponse(
-                null,
-                false,
-                listOf(
-                    Error(
-                        code = ErrorCode.UNKNOWN,
-                        group = ErrorGroup.EXCEPTIONS,
-                        message = e.message.toString(),
-                        exception = e
-                    )
-                )
-            )
+            return@withDbErrorHandler DbExpenseResponse(record.toExpenseInternal(), true)
         }
     }
 
     override suspend fun search(request: DbExpenseSearchRequest): DbExpensesSearchResponse {
         val clauseParts = mutableListOf<String>()
         val params = hashMapOf<String, Any>()
+        if (request.createdBy != null) {
+            clauseParts.add("createdBy = :createdBy")
+            params["createdBy"] = request.createdBy!!.asString()
+        }
         if (request.amountFrom != null) {
             clauseParts.add("amount >= :amountFrom")
             params["amountFrom"] = request.amountFrom!!.toDouble()
@@ -305,6 +278,10 @@ class ExpenseArcadeDbRepository(
             val clauseParts = mutableListOf<String>()
             val params = hashMapOf<String, Any>()
 
+            if (request.createdBy != null) {
+                clauseParts.add("createdBy = :createdBy")
+                params["createdBy"] = request.createdBy!!.asString()
+            }
             if (request.dateFrom != null) {
                 clauseParts.add("createDT >= :dateFrom")
                 params["dateFrom"] = request.dateFrom!!.toEpochMilliseconds()

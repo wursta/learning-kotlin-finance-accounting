@@ -20,6 +20,8 @@ paths:
         - Card
       summary: Добавление банковской карты
       operationId: cardCreate
+      security:
+        - basicAuth: [ ]
       requestBody:
         description: Request body
         content:
@@ -46,6 +48,8 @@ paths:
         - Card
       summary: Получение данных банковской карты
       operationId: cardRead
+      security:
+        - basicAuth: [ ]
       requestBody:
         description: Request body
         content:
@@ -72,6 +76,8 @@ paths:
         - Card
       summary: Обновление данных банковской карты
       operationId: cardUpdate
+      security:
+        - basicAuth: [ ]
       requestBody:
         description: Request body
         content:
@@ -98,6 +104,8 @@ paths:
         - Card
       summary: Удаление банковской карты
       operationId: cardDelete
+      security:
+        - basicAuth: [ ]
       requestBody:
         description: Request body
         content:
@@ -125,6 +133,8 @@ paths:
         - Expense
       summary: Добавление траты
       operationId: expenseCreate
+      security:
+        - basicAuth: [ ]
       requestBody:
         description: Request body
         content:
@@ -151,6 +161,8 @@ paths:
         - Expense
       summary: Получение данных траты
       operationId: expenseRead
+      security:
+        - basicAuth: [ ]
       requestBody:
         description: Request body
         content:
@@ -177,6 +189,8 @@ paths:
         - Expense
       summary: Обновление данных траты
       operationId: expenseUpdate
+      security:
+        - basicAuth: [ ]
       requestBody:
         description: Request body
         content:
@@ -203,6 +217,8 @@ paths:
         - Expense
       summary: Удаление траты
       operationId: expenseDelete
+      security:
+        - basicAuth: [ ]
       requestBody:
         description: Request body
         content:
@@ -229,6 +245,8 @@ paths:
         - Expense
       summary: Поиск трат по фильтрам
       operationId: expenseSearch
+      security:
+        - basicAuth: [ ]
       requestBody:
         description: Request body
         content:
@@ -255,6 +273,8 @@ paths:
         - Expense
       summary: Поиск статистики по тратам
       operationId: expenseStats
+      security:
+        - basicAuth: [ ]
       requestBody:
         description: Request body
         content:
@@ -277,6 +297,10 @@ paths:
                 $ref: '#/components/schemas/InternalErrorResponse'
 
 components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
   schemas:
     # COMMON
     IRequest:

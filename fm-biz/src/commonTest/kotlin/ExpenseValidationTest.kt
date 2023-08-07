@@ -8,9 +8,8 @@ import local.learning.common.CorSettings
 import local.learning.common.ExpenseContext
 import local.learning.common.errors.ErrorCode
 import local.learning.common.errors.ErrorGroup
-import local.learning.common.models.LockGuid
-import local.learning.common.models.State
-import local.learning.common.models.WorkMode
+import local.learning.common.models.*
+import local.learning.common.models.access.Role
 import local.learning.common.models.card.CardGuid
 import local.learning.common.models.category.CategoryGuid
 import local.learning.common.models.expense.*
@@ -32,7 +31,8 @@ class ExpenseValidationTest {
                         amount = BigDecimal(1234.56),
                         cardGuid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93"),
                         categoryGuid = CategoryGuid("5410bdaf-834a-4ca6-9044-ee25d5a7164c"),
-                        lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
+                        lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede"),
+                        createdBy = PrincipalId("test")
                     )
                 )
             )
@@ -49,6 +49,10 @@ class ExpenseValidationTest {
                 amount = BigDecimal(1234.56),
                 cardGuid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93"),
                 categoryGuid = CategoryGuid("5410bdaf-834a-4ca6-9044-ee25d5a7164c")
+            ),
+            principal = Principal(
+                id = PrincipalId("test"),
+                role = Role.USER
             )
         )
 
@@ -97,6 +101,10 @@ class ExpenseValidationTest {
             workMode = WorkMode.TEST,
             expenseRequest = Expense(
                 guid = ExpenseGuid("1598044e-5259-11e9-8647-d663bd873d93")
+            ),
+            principal = Principal(
+                id = PrincipalId("test"),
+                role = Role.USER
             )
         )
 
@@ -139,6 +147,10 @@ class ExpenseValidationTest {
                 cardGuid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93"),
                 categoryGuid = CategoryGuid("5410bdaf-834a-4ca6-9044-ee25d5a7164c"),
                 lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
+            ),
+            principal = Principal(
+                id = PrincipalId("test"),
+                role = Role.USER
             )
         )
 
@@ -193,6 +205,10 @@ class ExpenseValidationTest {
             expenseRequest = Expense(
                 guid = ExpenseGuid("1598044e-5259-11e9-8647-d663bd873d93"),
                 lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
+            ),
+            principal = Principal(
+                id = PrincipalId("test"),
+                role = Role.USER
             )
         )
 
@@ -237,6 +253,10 @@ class ExpenseValidationTest {
                     CardGuid("1598044e-5259-11e9-8647-d663bd873d93"),
                     CardGuid("3fa85f64-5717-4562-b3fc-2c963f66afa6")
                 )
+            ),
+            principal = Principal(
+                id = PrincipalId("test"),
+                role = Role.USER
             )
         )
 
@@ -298,6 +318,10 @@ class ExpenseValidationTest {
             expenseStatisticRequest = ExpenseStatisticFilter(
                 dateFrom = Instant.parse("2023-01-01T14:46:04Z"),
                 dateTo = Instant.parse("2023-01-02T14:46:04Z"),
+            ),
+            principal = Principal(
+                id = PrincipalId("test"),
+                role = Role.USER
             )
         )
 

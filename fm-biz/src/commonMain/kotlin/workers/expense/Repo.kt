@@ -5,6 +5,7 @@ import com.crowdproj.kotlin.cor.handlers.worker
 import local.learning.common.ExpenseContext
 import local.learning.common.INSTANT_NEGATIVE_INFINITY
 import local.learning.common.INSTANT_POSITIVE_INFINITY
+import local.learning.common.helpers.repoFail
 import local.learning.common.models.State
 import local.learning.common.models.WorkMode
 import local.learning.common.repo.IExpenseRepository
@@ -33,14 +34,15 @@ fun CorChainDsl<ExpenseContext>.repoCreate() = worker {
     this.title = "Добавление новой траты"
     on { state == State.RUNNING }
     handle {
-        val request = DbExpenseRequest(expenseValidating.copy())
+        val request = DbExpenseRequest(expenseValidating.copy(
+            createdBy = principal.id
+        ))
         val result = repo.create(request)
         val resultExpense = result.expense
         if (result.success && resultExpense != null) {
             expenseRepoResult = resultExpense
         } else {
-            state = State.FAILING
-            errors.addAll(result.errors)
+            repoFail(result.errors)
         }
     }
 }
@@ -58,8 +60,7 @@ fun CorChainDsl<ExpenseContext>.repoRead() = worker {
         if (result.success && resultExpense != null) {
             expenseRepoResult = resultExpense
         } else {
-            state = State.FAILING
-            errors.addAll(result.errors)
+            repoFail(result.errors)
         }
     }
 }
@@ -74,8 +75,7 @@ fun CorChainDsl<ExpenseContext>.repoUpdate() = worker {
         if (result.success && resultExpense != null) {
             expenseRepoResult = resultExpense
         } else {
-            state = State.FAILING
-            errors.addAll(result.errors)
+            repoFail(result.errors)
         }
     }
 }
@@ -93,8 +93,7 @@ fun CorChainDsl<ExpenseContext>.repoDelete() = worker {
         if (result.success && resultExpense != null) {
             expenseRepoResult = resultExpense
         } else {
-            state = State.FAILING
-            errors.addAll(result.errors)
+            repoFail(result.errors)
         }
     }
 }
@@ -104,6 +103,7 @@ fun CorChainDsl<ExpenseContext>.repoSearch() = worker {
     on { state == State.RUNNING }
     handle {
         val request = DbExpenseSearchRequest(
+            createdBy = principal.id,
             amountFrom = expenseSearchValidating.amountFrom.takeIf { it != BigDecimal(-1) },
             amountTo = expenseSearchValidating.amountTo.takeIf { it != BigDecimal(-1) },
             dateFrom = expenseSearchValidating.dateFrom.takeIf { it != INSTANT_NEGATIVE_INFINITY },
@@ -115,8 +115,7 @@ fun CorChainDsl<ExpenseContext>.repoSearch() = worker {
         if (result.success) {
             expenseSearchRepoResult = resultExpenses
         } else {
-            state = State.FAILING
-            errors.addAll(result.errors)
+            repoFail(result.errors)
         }
     }
 }
@@ -126,6 +125,7 @@ fun CorChainDsl<ExpenseContext>.repoStatistic() = worker {
     on { state == State.RUNNING }
     handle {
         val request = DbExpenseStatisticRequest(
+            createdBy = principal.id,
             dateFrom = expenseStatisticValidating.dateFrom.takeIf { it != INSTANT_NEGATIVE_INFINITY },
             dateTo = expenseStatisticValidating.dateFrom.takeIf { it != INSTANT_POSITIVE_INFINITY }
         )
@@ -133,8 +133,7 @@ fun CorChainDsl<ExpenseContext>.repoStatistic() = worker {
         if (result.success) {
             expenseStatisticRepoResult = result.expenseStatistic
         } else {
-            state = State.FAILING
-            errors.addAll(result.errors)
+            repoFail(result.errors)
         }
     }
 }

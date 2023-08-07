@@ -6,9 +6,8 @@ import local.learning.common.CardContext
 import local.learning.common.CorSettings
 import local.learning.common.errors.ErrorCode
 import local.learning.common.errors.ErrorGroup
-import local.learning.common.models.LockGuid
-import local.learning.common.models.State
-import local.learning.common.models.WorkMode
+import local.learning.common.models.*
+import local.learning.common.models.access.Role
 import local.learning.common.models.bank.BankGuid
 import local.learning.common.models.card.Card
 import local.learning.common.models.card.CardCommand
@@ -31,7 +30,8 @@ class CardValidationTest {
                         owner = "   SAZONOV MIKHAIL   ",
                         validFor = "2023-01",
                         bankGuid = BankGuid("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
-                        lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
+                        lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede"),
+                        createdBy = PrincipalId("test")
                     )
                 )
             )
@@ -49,11 +49,15 @@ class CardValidationTest {
                 owner = "   SAZONOV MIKHAIL   ",
                 validFor = "2023-01",
                 bankGuid = BankGuid("3fa85f64-5717-4562-b3fc-2c963f66afa6")
+            ),
+            principal = Principal(
+                id = PrincipalId("test"),
+                role = Role.USER
             )
         )
 
         processor.exec(ctx)
-
+        println(ctx.errors)
         assertTrue { ctx.errors.size == 0 }
         assertNotEquals(State.FAILING, ctx.state)
         assertEquals(ctx.cardRequest.number, ctx.cardValidating.number)
@@ -119,6 +123,10 @@ class CardValidationTest {
             workMode = WorkMode.TEST,
             cardRequest = Card(
                 guid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93")
+            ),
+            principal = Principal(
+                id = PrincipalId("test"),
+                role = Role.USER
             )
         )
 
@@ -163,6 +171,10 @@ class CardValidationTest {
                 validFor = "2023-01",
                 bankGuid = BankGuid("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
                 lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
+            ),
+            principal = Principal(
+                id = PrincipalId("test"),
+                role = Role.USER
             )
         )
 
@@ -241,6 +253,10 @@ class CardValidationTest {
             cardRequest = Card(
                 guid = CardGuid("1598044e-5259-11e9-8647-d663bd873d93"),
                 lockGuid = LockGuid("9e6aaa2f-1c8d-4279-b525-4ef391589ede")
+            ),
+            principal = Principal(
+                id = PrincipalId("test"),
+                role = Role.USER
             )
         )
 

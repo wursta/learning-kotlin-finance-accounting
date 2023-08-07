@@ -49,6 +49,7 @@ kotlin {
                 implementation(ktor("json", "serialization-kotlinx"))
                 implementation(ktor ("status-pages"))
                 implementation(ktor ("cors"))
+                implementation(ktor ("auth"))
 
                 // Project
                 implementation(project(":fm-api"))

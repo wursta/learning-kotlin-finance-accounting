@@ -1,3 +1,6 @@
+package local.learning.repo.arcadedb
+
+import ArcadeDbContainer
 import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -25,11 +28,13 @@ class CardArcadeDbRepositoryTest {
         val userPassword = ArcadeDbContainer.password
 
         repo = CardArcadeDbRepository(
-            host = host,
-            port = port,
-            dbName = dbName,
-            userName = userName,
-            userPassword = userPassword
+            settings = ArcadeDbSettings(
+                host = host,
+                port = port,
+                dbName = dbName,
+                userName = userName,
+                userPassword = userPassword
+            )
         )
 
         ArcadeDbSchema.initialize(host, port, dbName, userName, userPassword)

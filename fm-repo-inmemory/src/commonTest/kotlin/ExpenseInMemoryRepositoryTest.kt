@@ -162,7 +162,8 @@ class ExpenseInMemoryRepositoryTest {
             amountFrom = BigDecimal.ZERO,
             amountTo = BigDecimal(200),
             dateFrom = null,
-            dateTo = null
+            dateTo = null,
+            createdBy = null
         )
 
         val resultAmountCase = repo.search(searchAmountCaseRequest)
@@ -176,6 +177,7 @@ class ExpenseInMemoryRepositoryTest {
             amountTo = null,
             dateFrom = Instant.parse("2023-01-01T00:00:00Z"),
             dateTo = Instant.parse("2023-01-02T23:59:59Z"),
+            createdBy = null
         )
 
         val resultDatesCase = repo.search(searchDatesCaseRequest)
@@ -189,7 +191,8 @@ class ExpenseInMemoryRepositoryTest {
     fun stats() = runTest {
         val request = DbExpenseStatisticRequest(
             dateFrom = null,
-            dateTo = null
+            dateTo = null,
+            createdBy = null
         )
 
         val result = repo.stats(request)

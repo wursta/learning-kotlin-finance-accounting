@@ -7,5 +7,6 @@ enum class ErrorCode {
     EMPTY_GUID,
     EMPTY_LOCK,
     NOT_FOUND,
-    INVALID_LOCK
+    INVALID_LOCK,
+    ACCESS_DENY
 }
