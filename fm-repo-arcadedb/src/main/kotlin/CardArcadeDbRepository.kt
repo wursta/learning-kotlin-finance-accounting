@@ -1,3 +1,5 @@
+package local.learning.repo.arcadedb
+
 import com.arcadedb.query.sql.executor.EmptyResult
 import com.arcadedb.remote.RemoteDatabase
 import com.benasher44.uuid.uuid4
@@ -13,15 +15,11 @@ import local.learning.common.repo.card.DbCardRequest
 import local.learning.common.repo.card.DbCardResponse
 
 class CardArcadeDbRepository(
-    private val host: String,
-    private val port: Int,
-    private val dbName: String,
-    private val userName: String,
-    private val userPassword: String,
+    private val settings: ArcadeDbSettings,
     val randomUuid: () -> String = { uuid4().toString() }
 ) : ICardRepository {
     private val db by lazy {
-        RemoteDatabase(host, port, dbName, userName, userPassword)
+        RemoteDatabase(settings.host, settings.port, settings.dbName, settings.userName, settings.userPassword)
     }
 
     fun initRepo(vararg cards: Card) {
@@ -34,44 +32,24 @@ class CardArcadeDbRepository(
                         "validFor = :validFor, " +
                         "owner = :owner, " +
                         "bankGuid = :bankGuid, " +
-                        "lockGuid = :lockGuid",
+                        "lockGuid = :lockGuid, " +
+                        "createdBy = :createdBy",
                 hashMapOf(
                     Pair("guid", card.guid.asString()),
                     Pair("number", card.number),
                     Pair("validFor", card.validFor),
                     Pair("owner", card.owner),
                     Pair("bankGuid", card.bankGuid.asString()),
-                    Pair("lockGuid", card.lockGuid.asString())
+                    Pair("lockGuid", card.lockGuid.asString()),
+                    Pair("createdBy", card.createdBy.asString())
                 )
             )
         }
     }
 
-    override suspend fun create(cardRequest: DbCardRequest): DbCardResponse {
-        val guid = randomUuid()
-        val card = cardRequest.card.copy(guid = CardGuid(guid), lockGuid = LockGuid(randomUuid()))
-
+    private fun withDbErrorHandler(block:  () -> DbCardResponse): DbCardResponse {
         try {
-            val resultSet = db.command(
-                "sql",
-                "CREATE VERTEX card SET " +
-                        "guid = :guid, " +
-                        "number = :number, " +
-                        "validFor = :validFor, " +
-                        "owner = :owner, " +
-                        "bankGuid = :bankGuid, " +
-                        "lockGuid = :lockGuid",
-                hashMapOf(
-                    Pair("guid", card.guid.asString()),
-                    Pair("number", card.number),
-                    Pair("validFor", card.validFor),
-                    Pair("owner", card.owner),
-                    Pair("bankGuid", card.bankGuid.asString()),
-                    Pair("lockGuid", card.lockGuid.asString())
-                )
-            )
-            val record = resultSet.nextIfAvailable()
-            return DbCardResponse(record.toCardInternal(), true)
+            return block()
         } catch (e: Throwable) {
             return DbCardResponse(
                 null,
@@ -88,24 +66,56 @@ class CardArcadeDbRepository(
         }
     }
 
+    override suspend fun create(cardRequest: DbCardRequest): DbCardResponse {
+        val guid = randomUuid()
+        val card = cardRequest.card.copy(guid = CardGuid(guid), lockGuid = LockGuid(randomUuid()))
+
+        return withDbErrorHandler {
+            val resultSet = db.command(
+                "sql",
+                "CREATE VERTEX card SET " +
+                        "guid = :guid, " +
+                        "number = :number, " +
+                        "validFor = :validFor, " +
+                        "owner = :owner, " +
+                        "bankGuid = :bankGuid, " +
+                        "lockGuid = :lockGuid, " +
+                        "createdBy = :createdBy",
+                hashMapOf(
+                    Pair("guid", card.guid.asString()),
+                    Pair("number", card.number),
+                    Pair("validFor", card.validFor),
+                    Pair("owner", card.owner),
+                    Pair("bankGuid", card.bankGuid.asString()),
+                    Pair("lockGuid", card.lockGuid.asString()),
+                    Pair("createdBy", card.createdBy.asString())
+                )
+            )
+            val record = resultSet.nextIfAvailable()
+            return@withDbErrorHandler DbCardResponse(record.toCardInternal(), true)
+        }
+    }
+
     override suspend fun read(cardGuidRequest: DbCardGuidRequest): DbCardResponse {
         val key = cardGuidRequest.guid.takeIf { it != CardGuid.NONE }?.asString() ?: return resultErrorEmptyGuid
 
-        val resultSet = db.command(
-            "sql",
-            "SELECT FROM card WHERE guid = :guid",
-            hashMapOf(
-                Pair("guid", key)
+        return withDbErrorHandler {
+            val resultSet = db.command(
+                "sql",
+                "SELECT FROM card WHERE guid = :guid",
+                hashMapOf(
+                    Pair("guid", key)
+                )
             )
-        )
 
-        val record = resultSet.nextIfAvailable()
+            val record = resultSet.nextIfAvailable()
 
-        if (record is EmptyResult) {
-            return resultErrorNotFound
+            if (record is EmptyResult) {
+                return@withDbErrorHandler resultErrorNotFound
+            }
+
+            return@withDbErrorHandler DbCardResponse(record.toCardInternal(), true)
         }
-
-        return DbCardResponse(record.toCardInternal(), true)
     }
 
     override suspend fun update(cardRequest: DbCardRequest): DbCardResponse {
@@ -113,53 +123,55 @@ class CardArcadeDbRepository(
         val lockFromRequest =
             cardRequest.card.lockGuid.takeIf { it != LockGuid.NONE }?.asString() ?: return resultErrorEmptyLock
 
-        val resultSetForUpdate = db.command(
-            "sql",
-            "SELECT FROM card WHERE guid = :guid",
-            hashMapOf(
-                Pair("guid", key),
-                Pair("lockGuid", lockFromRequest)
+        return withDbErrorHandler {
+            val resultSetForUpdate = db.command(
+                "sql",
+                "SELECT FROM card WHERE guid = :guid",
+                hashMapOf(
+                    Pair("guid", key),
+                    Pair("lockGuid", lockFromRequest)
+                )
             )
-        )
 
-        val recordForUpdate = resultSetForUpdate.nextIfAvailable()
+            val recordForUpdate = resultSetForUpdate.nextIfAvailable()
 
-        if (recordForUpdate is EmptyResult) {
-            return resultErrorNotFound
-        }
+            if (recordForUpdate is EmptyResult) {
+                return@withDbErrorHandler resultErrorNotFound
+            }
 
-        if (recordForUpdate.getProperty<String>("lockGuid") != lockFromRequest) {
-            return resultErrorInvalidLock
-        }
+            if (recordForUpdate.getProperty<String>("lockGuid") != lockFromRequest) {
+                return@withDbErrorHandler resultErrorInvalidLock
+            }
 
-        val resultSet = db.command(
-            "sql",
-            "UPDATE card SET " +
-                    "number = :number, " +
-                    "validFor = :validFor, " +
-                    "owner = :owner, " +
-                    "bankGuid = :bankGuid, " +
-                    "lockGuid = :newLockGuid " +
-                    "RETURN AFTER " +
-                    "WHERE guid = :guid AND lockGuid = :oldLockGuid",
-            hashMapOf(
-                Pair("guid", key),
-                Pair("number", cardRequest.card.number),
-                Pair("validFor", cardRequest.card.validFor),
-                Pair("owner", cardRequest.card.owner),
-                Pair("bankGuid", cardRequest.card.bankGuid.asString()),
-                Pair("newLockGuid", randomUuid()),
-                Pair("oldLockGuid", lockFromRequest)
+            val resultSet = db.command(
+                "sql",
+                "UPDATE card SET " +
+                        "number = :number, " +
+                        "validFor = :validFor, " +
+                        "owner = :owner, " +
+                        "bankGuid = :bankGuid, " +
+                        "lockGuid = :newLockGuid " +
+                        "RETURN AFTER " +
+                        "WHERE guid = :guid AND lockGuid = :oldLockGuid",
+                hashMapOf(
+                    Pair("guid", key),
+                    Pair("number", cardRequest.card.number),
+                    Pair("validFor", cardRequest.card.validFor),
+                    Pair("owner", cardRequest.card.owner),
+                    Pair("bankGuid", cardRequest.card.bankGuid.asString()),
+                    Pair("newLockGuid", randomUuid()),
+                    Pair("oldLockGuid", lockFromRequest)
+                )
             )
-        )
 
-        val record = resultSet.nextIfAvailable()
+            val record = resultSet.nextIfAvailable()
 
-        if (record is EmptyResult) {
-            return resultErrorInvalidLock
+            if (record is EmptyResult) {
+                return@withDbErrorHandler resultErrorInvalidLock
+            }
+
+            return@withDbErrorHandler DbCardResponse(record.toCardInternal(), true)
         }
-
-        return DbCardResponse(record.toCardInternal(), true)
     }
 
     override suspend fun delete(cardRequest: DbCardGuidRequest): DbCardResponse {
@@ -167,43 +179,45 @@ class CardArcadeDbRepository(
         val lockFromRequest =
             cardRequest.lockGuid.takeIf { it != LockGuid.NONE }?.asString() ?: return resultErrorEmptyLock
 
-        val resultSetForDelete = db.command(
-            "sql",
-            "SELECT FROM card WHERE guid = :guid",
-            hashMapOf(
-                Pair("guid", key),
-                Pair("lockGuid", lockFromRequest)
+        return withDbErrorHandler {
+            val resultSetForDelete = db.command(
+                "sql",
+                "SELECT FROM card WHERE guid = :guid",
+                hashMapOf(
+                    Pair("guid", key),
+                    Pair("lockGuid", lockFromRequest)
+                )
             )
-        )
 
-        val recordForDelete = resultSetForDelete.nextIfAvailable()
+            val recordForDelete = resultSetForDelete.nextIfAvailable()
 
-        if (recordForDelete is EmptyResult) {
-            return resultErrorNotFound
-        }
+            if (recordForDelete is EmptyResult) {
+                return@withDbErrorHandler resultErrorNotFound
+            }
 
-        if (recordForDelete.getProperty<String>("lockGuid") != lockFromRequest) {
-            return resultErrorInvalidLock
-        }
+            if (recordForDelete.getProperty<String>("lockGuid") != lockFromRequest) {
+                return@withDbErrorHandler resultErrorInvalidLock
+            }
 
-        val resultSet = db.command(
-            "sql",
-            "DELETE FROM card " +
-                    "RETURN BEFORE " +
-                    "WHERE guid = :guid AND lockGuid = :lockGuid",
-            hashMapOf(
-                Pair("guid", key),
-                Pair("lockGuid", lockFromRequest)
+            val resultSet = db.command(
+                "sql",
+                "DELETE FROM card " +
+                        "RETURN BEFORE " +
+                        "WHERE guid = :guid AND lockGuid = :lockGuid",
+                hashMapOf(
+                    Pair("guid", key),
+                    Pair("lockGuid", lockFromRequest)
+                )
             )
-        )
 
-        val record = resultSet.nextIfAvailable()
+            val record = resultSet.nextIfAvailable()
 
-        if (record is EmptyResult) {
-            return resultErrorInvalidLock
+            if (record is EmptyResult) {
+                return@withDbErrorHandler resultErrorInvalidLock
+            }
+
+            return@withDbErrorHandler DbCardResponse(record.toCardInternal(), true)
         }
-
-        return DbCardResponse(record.toCardInternal(), true)
     }
 
     companion object {

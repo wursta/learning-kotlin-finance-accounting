@@ -1,9 +1,9 @@
 package local.kotlin.learning.fm.acceptance
 
-import ArcadeDbSchema
 import io.kotest.core.annotation.AutoScan
 import io.kotest.core.listeners.AfterProjectListener
 import io.kotest.core.listeners.BeforeProjectListener
+import local.learning.repo.arcadedb.ArcadeDbSchema
 import mu.KotlinLogging
 
 private val log = KotlinLogging.logger {}

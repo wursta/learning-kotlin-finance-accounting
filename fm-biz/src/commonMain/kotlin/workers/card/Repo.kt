@@ -3,6 +3,7 @@ package local.learning.app.biz.workers.card
 import com.crowdproj.kotlin.cor.handlers.CorChainDsl
 import com.crowdproj.kotlin.cor.handlers.worker
 import local.learning.common.CardContext
+import local.learning.common.helpers.repoFail
 import local.learning.common.models.State
 import local.learning.common.models.WorkMode
 import local.learning.common.repo.ICardRepository
@@ -27,14 +28,15 @@ fun CorChainDsl<CardContext>.repoCreate() = worker {
     this.title = "Добавление новой карты"
     on { state == State.RUNNING }
     handle {
-        val request = DbCardRequest(cardValidating.copy())
+        val request = DbCardRequest(cardValidating.copy(
+            createdBy = principal.id
+        ))
         val result = repo.create(request)
         val resultCard = result.card
         if (result.success && resultCard != null) {
             cardRepoResult = resultCard
         } else {
-            state = State.FAILING
-            errors.addAll(result.errors)
+            repoFail(result.errors)
         }
     }
 }
@@ -49,8 +51,7 @@ fun CorChainDsl<CardContext>.repoRead() = worker {
         if (result.success && resultCard != null) {
             cardRepoResult = resultCard
         } else {
-            state = State.FAILING
-            errors.addAll(result.errors)
+            repoFail(result.errors)
         }
     }
 }
@@ -65,8 +66,7 @@ fun CorChainDsl<CardContext>.repoUpdate() = worker {
         if (result.success && resultCard != null) {
             cardRepoResult = resultCard
         } else {
-            state = State.FAILING
-            errors.addAll(result.errors)
+            repoFail(result.errors)
         }
     }
 }
@@ -81,8 +81,7 @@ fun CorChainDsl<CardContext>.repoDelete() = worker {
         if (result.success && resultCard != null) {
             cardRepoResult = resultCard
         } else {
-            state = State.FAILING
-            errors.addAll(result.errors)
+            repoFail(result.errors)
         }
     }
 }

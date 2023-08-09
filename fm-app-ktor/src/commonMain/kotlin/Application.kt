@@ -1,10 +1,9 @@
 package local.learning.app.ktor
 
-import CardArcadeDbRepository
-import ExpenseArcadeDbRepository
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -12,6 +11,7 @@ import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.util.*
 import kotlinx.serialization.encodeToString
 import local.learning.api.models.InternalErrorResponseDto
 import local.learning.api.serialization.utils.jsonSerializer
@@ -21,35 +21,31 @@ import local.learning.app.ktor.routing.card
 import local.learning.app.ktor.routing.expense
 import local.learning.common.CorSettings
 import local.learning.common.log.LoggerProvider
+import local.learning.repo.arcadedb.ArcadeDbSettings
+import local.learning.repo.arcadedb.CardArcadeDbRepository
+import local.learning.repo.arcadedb.ExpenseArcadeDbRepository
 import local.learning.repo.inmemory.CardInMemoryRepository
 import local.learning.repo.inmemory.ExpenseInMemoryRepository
 
 expect fun Application.getLoggerProviderConf(): LoggerProvider
 fun Application.initAppSettings(): ApplicationSettings {
-    val arcadeDbHost = environment.config.property("arcadeDb.host").getString()
-    val arcadeDbPort = environment.config.property("arcadeDb.port").getString().toInt()
-    val arcadeDbName = environment.config.property("arcadeDb.dbName").getString()
-    val arcadeDbUserName = environment.config.property("arcadeDb.user").getString()
-    val arcadeDbUserPass = environment.config.property("arcadeDb.pass").getString()
+    val arcadeDbSettings = ArcadeDbSettings(
+        host = environment.config.property("arcadeDb.host").getString(),
+        port = environment.config.property("arcadeDb.port").getString().toInt(),
+        dbName = environment.config.property("arcadeDb.dbName").getString(),
+        userName = environment.config.property("arcadeDb.user").getString(),
+        userPassword = environment.config.property("arcadeDb.pass").getString()
+    )
+
+    val digestFunction = getDigestFunction("SHA-256") { "ktor${it.length}" }
 
     val corSettings = CorSettings(
         loggerProvider = getLoggerProviderConf(),
+        principalRepo = PrincipalInMemoryRepository(digestFunction),
         cardRepoTest = CardInMemoryRepository(),
-        cardRepoProd = CardArcadeDbRepository(
-            host = arcadeDbHost,
-            port = arcadeDbPort,
-            dbName = arcadeDbName,
-            userName = arcadeDbUserName,
-            userPassword = arcadeDbUserPass
-        ),
+        cardRepoProd = CardArcadeDbRepository(arcadeDbSettings),
         expenseRepoTest = ExpenseInMemoryRepository(),
-        expenseRepoProd = ExpenseArcadeDbRepository(
-            host = arcadeDbHost,
-            port = arcadeDbPort,
-            dbName = arcadeDbName,
-            userName = arcadeDbUserName,
-            userPassword = arcadeDbUserPass
-        )
+        expenseRepoProd = ExpenseArcadeDbRepository(arcadeDbSettings)
     )
 
     return ApplicationSettings(
@@ -88,14 +84,30 @@ fun Application.mainModule(
         }
     }
 
-    routing {
-        route("api") {
-            install(ContentNegotiation) {
-                json(jsonSerializer)
+    install(Authentication) {
+        basic("main-auth") {
+            realm = "Access to the app"
+            validate { credentials ->
+                val principal = appSettings.corSettings.principalRepo.authenticate(credentials.name, credentials.password)
+                if (principal != null) {
+                    UserIdPrincipal(principal.id.asString())
+                } else {
+                    null
+                }
             }
+        }
+    }
 
-            card(appSettings)
-            expense(appSettings)
+    routing {
+        authenticate("main-auth") {
+            route("api") {
+                install(ContentNegotiation) {
+                    json(jsonSerializer)
+                }
+
+                card(appSettings)
+                expense(appSettings)
+            }
         }
     }
 }

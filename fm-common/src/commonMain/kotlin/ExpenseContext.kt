@@ -1,10 +1,7 @@
 package local.learning.common
 
 import kotlinx.datetime.Instant
-import local.learning.common.models.Error
-import local.learning.common.models.RequestId
-import local.learning.common.models.State
-import local.learning.common.models.WorkMode
+import local.learning.common.models.*
 import local.learning.common.models.expense.*
 import local.learning.common.repo.IExpenseRepository
 
@@ -24,6 +21,11 @@ data class ExpenseContext(
 
     // Repo
     var repo: IExpenseRepository = IExpenseRepository.NONE,
+
+    // Access
+    var principal: Principal = Principal.NONE,
+    val permissions: MutableSet<ExpensePermission> = mutableSetOf(),
+    var permitted: Boolean = false,
 
     // Requests & Responses
     var expenseRequest: Expense = Expense(),

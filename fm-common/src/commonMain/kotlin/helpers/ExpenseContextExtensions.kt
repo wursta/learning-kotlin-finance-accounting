@@ -5,6 +5,7 @@ import local.learning.common.errors.ErrorCode
 import local.learning.common.errors.ErrorGroup
 import local.learning.common.exceptions.InvalidFieldFormat
 import local.learning.common.models.Error
+import local.learning.common.models.State
 
 fun ExpenseContext.addError(vararg error: Error)  = errors.addAll(error)
 fun ExpenseContext.fail(e: Throwable) = addError(e.asError())
@@ -17,3 +18,8 @@ fun ExpenseContext.addFieldValidationError(field: String, description: String) =
         message = "Validation error for field $field. $description",
     )
 )
+
+fun ExpenseContext.repoFail(dbErrors: List<Error>) {
+    state = State.FAILING
+    errors.addAll(dbErrors)
+}

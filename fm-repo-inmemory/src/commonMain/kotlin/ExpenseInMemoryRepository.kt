@@ -9,6 +9,7 @@ import local.learning.common.errors.ErrorCode
 import local.learning.common.errors.ErrorGroup
 import local.learning.common.models.Error
 import local.learning.common.models.LockGuid
+import local.learning.common.models.PrincipalId
 import local.learning.common.models.category.Category
 import local.learning.common.models.category.CategoryGuid
 import local.learning.common.models.expense.Expense
@@ -89,6 +90,10 @@ class ExpenseInMemoryRepository(
         val filteredExpenses = cache.asMap().filter {
             val expense = it.value.toInternal()
 
+            if (request.createdBy != null && !searchCreatedByPredicate(expense, request.createdBy!!)) {
+                return@filter false
+            }
+
             if (request.amountFrom != null && !searchAmountFromPredicate(expense, request.amountFrom!!)) {
                 return@filter false
             }
@@ -131,11 +136,14 @@ class ExpenseInMemoryRepository(
             )
 
             // Summarize amounts to expense category in map
-            cache.asMap().forEach { guid, expense ->
+            cache.asMap().forEach { (_, expense) ->
                 val expenseAmount = expense.amount ?: BigDecimal.ZERO
                 val summaryByCategory = summaryCategoryMap[expense.categoryGuid]
                     ?: throw Exception("This can't be! Category not found in map, but just now we collect them...")
 
+                if (request.createdBy != null && !searchCreatedByPredicate(expense.toInternal(), request.createdBy!!)) {
+                    return@forEach
+                }
                 if (request.dateFrom != null && !searchDateFromPredicate(expense.toInternal(), request.dateFrom!!)) {
                     return@forEach
                 }
@@ -157,6 +165,10 @@ class ExpenseInMemoryRepository(
     }
 
     companion object {
+        val searchCreatedByPredicate: (Expense, PrincipalId) -> Boolean = p@{ expense, createdBy ->
+            return@p expense.createdBy == createdBy
+        }
+
         val searchAmountFromPredicate: (Expense, BigDecimal) -> Boolean = p@{ expense, amountFrom ->
             return@p expense.amount.compareTo(amountFrom) >= 0
         }

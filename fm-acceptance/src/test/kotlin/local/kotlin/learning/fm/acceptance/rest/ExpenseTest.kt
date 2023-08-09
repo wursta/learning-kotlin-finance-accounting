@@ -1,6 +1,5 @@
 package local.kotlin.learning.fm.acceptance.rest
 
-import ArcadeDbSchema
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.datatest.withData
@@ -14,6 +13,7 @@ import local.kotlin.learning.fm.acceptance.AppCompose
 import local.kotlin.learning.fm.acceptance.ExpenseTestDataProvider
 import local.kotlin.learning.fm.acceptance.RestClient
 import local.learning.api.models.*
+import local.learning.repo.arcadedb.ArcadeDbSchema
 import mu.KotlinLogging
 
 object ExpenseRoutes {
@@ -53,35 +53,35 @@ class ExpenseTest : BehaviorSpec({
         )
     ) { (workMode) ->
         given("Create new expense") {
-                    `when`("Fill correctly all required fields") {
-                        then("Expense saved") {
-                            val response = RestClient.request(
-                                ExpenseRoutes.CREATE,
-                                ExpenseCreateRequestDto(
-                                    requestType = "expenseCreate",
-                                    requestId = "uniqueId",
-                                    workMode = ExpenseRequestWorkModeDto(
-                                        mode = workMode
-                                    ),
-                                    expense = ExpenseCreateObjectDto(
-                                        createDt = "2023-01-01T14:46:04Z",
-                                        amount = 100.00,
-                                        card = "a8585ea8-e039-4799-b16c-06dc92f641f9",
-                                        category = "d08e4713-657e-4351-b983-536c1bae51b5",
-                                    )
-                                )
+            `when`("Fill correctly all required fields") {
+                then("Expense saved") {
+                    val response = RestClient.request(
+                        ExpenseRoutes.CREATE,
+                        ExpenseCreateRequestDto(
+                            requestType = "expenseCreate",
+                            requestId = "uniqueId",
+                            workMode = ExpenseRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            expense = ExpenseCreateObjectDto(
+                                createDt = "2023-01-01T14:46:04Z",
+                                amount = 100.00,
+                                card = "a8585ea8-e039-4799-b16c-06dc92f641f9",
+                                category = "d08e4713-657e-4351-b983-536c1bae51b5",
                             )
+                        )
+                    )
 
-                            response.shouldBeInstanceOf<ExpenseCreateResponseDto>()
-                            response.result shouldBe ResponseResultDto.SUCCESS
-                            response.errors?.shouldHaveSize(0)
-                            response.expense?.guid.shouldNotBeNull()
-                            response.expense?.amount shouldBe 100
-                            response.expense?.card shouldBe "a8585ea8-e039-4799-b16c-06dc92f641f9"
-                            response.expense?.category shouldBe "d08e4713-657e-4351-b983-536c1bae51b5"
-                            response.expense?.lock.shouldNotBeNull()
-                        }
-                    }
+                    response.shouldBeInstanceOf<ExpenseCreateResponseDto>()
+                    response.result shouldBe ResponseResultDto.SUCCESS
+                    response.errors?.shouldHaveSize(0)
+                    response.expense?.guid.shouldNotBeNull()
+                    response.expense?.amount shouldBe 100
+                    response.expense?.card shouldBe "a8585ea8-e039-4799-b16c-06dc92f641f9"
+                    response.expense?.category shouldBe "d08e4713-657e-4351-b983-536c1bae51b5"
+                    response.expense?.lock.shouldNotBeNull()
+                }
+            }
             `when`("Do not fill amount or it is invalid") {
                 then("Get validation error") {
                     val invalidAmounts = listOf(
@@ -235,6 +235,51 @@ class ExpenseTest : BehaviorSpec({
                     response.expense?.guid shouldBe newExpenseGuid
                 }
             }
+            `when`("Get info about other user expense") {
+                then("Get access deny error") {
+                    // Create expense
+                    val createResponse = RestClient.request(
+                        ExpenseRoutes.CREATE,
+                        TEST_USER_1,
+                        ExpenseCreateRequestDto(
+                            requestType = "expenseCreate",
+                            requestId = "uniqueId",
+                            workMode = ExpenseRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            expense = ExpenseCreateObjectDto(
+                                createDt = "2023-01-01T14:46:04Z",
+                                amount = 100.00,
+                                card = "a8585ea8-e039-4799-b16c-06dc92f641f9",
+                                category = "d08e4713-657e-4351-b983-536c1bae51b5",
+                            )
+                        )
+                    )
+
+                    createResponse.shouldBeInstanceOf<ExpenseCreateResponseDto>()
+                    val newExpenseGuid = createResponse.expense?.guid
+
+                    val response = RestClient.request(
+                        ExpenseRoutes.READ,
+                        TEST_USER_2,
+                        ExpenseReadRequestDto(
+                            requestType = "expenseCreate",
+                            requestId = "uniqueId",
+                            workMode = ExpenseRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            guid = newExpenseGuid
+                        )
+                    )
+
+                    response.shouldBeInstanceOf<ExpenseReadResponseDto>()
+                    response.result shouldBe ResponseResultDto.ERROR
+                    response.errors?.shouldHaveAtLeastSize(1)
+                    response.errors?.get(0)?.code shouldBe "access_deny"
+                    response.errors?.get(0)?.group shouldBe "access"
+
+                }
+            }
             `when`("Get info about expense with non existed guid") {
                 then("Get validation error") {
                     val response = RestClient.request(
@@ -312,7 +357,7 @@ class ExpenseTest : BehaviorSpec({
                     val newExpenseGuid = createResponse.expense?.guid
                     val newExpenseLock = createResponse.expense?.lock
 
-                    val response  = RestClient.request(
+                    val response = RestClient.request(
                         ExpenseRoutes.UPDATE,
                         ExpenseUpdateRequestDto(
                             requestType = "expenseUpdate",
@@ -340,9 +385,61 @@ class ExpenseTest : BehaviorSpec({
                     response.expense?.lock shouldNotBe newExpenseLock
                 }
             }
+            `when`("Update other user expense") {
+                then("Get access deny error") {
+                    // Create expense
+                    val createResponse = RestClient.request(
+                        ExpenseRoutes.CREATE,
+                        TEST_USER_1,
+                        ExpenseCreateRequestDto(
+                            requestType = "expenseCreate",
+                            requestId = "uniqueId",
+                            workMode = ExpenseRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            expense = ExpenseCreateObjectDto(
+                                createDt = "2023-01-01T14:46:04Z",
+                                amount = 100.00,
+                                card = "a8585ea8-e039-4799-b16c-06dc92f641f9",
+                                category = "d08e4713-657e-4351-b983-536c1bae51b5",
+                            )
+                        )
+                    )
+
+                    createResponse.shouldBeInstanceOf<ExpenseCreateResponseDto>()
+                    val newExpenseGuid = createResponse.expense?.guid
+                    val newExpenseLock = createResponse.expense?.lock
+
+                    val response = RestClient.request(
+                        ExpenseRoutes.UPDATE,
+                        TEST_USER_2,
+                        ExpenseUpdateRequestDto(
+                            requestType = "expenseUpdate",
+                            requestId = "uniqueId",
+                            workMode = ExpenseRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            expense = ExpenseObjectDto(
+                                guid = newExpenseGuid,
+                                createDt = "2023-01-01T14:46:04Z",
+                                amount = 150.00,
+                                card = "a8585ea8-e039-4799-b16c-06dc92f641f9",
+                                category = "d08e4713-657e-4351-b983-536c1bae51b5",
+                                lock = newExpenseLock
+                            )
+                        )
+                    )
+
+                    response.shouldBeInstanceOf<ExpenseUpdateResponseDto>()
+                    response.result shouldBe ResponseResultDto.ERROR
+                    response.errors?.shouldHaveAtLeastSize(1)
+                    response.errors?.get(0)?.code shouldBe "access_deny"
+                    response.errors?.get(0)?.group shouldBe "access"
+                }
+            }
             `when`("Expense guid existed, fill correctly all required fields") {
                 then("Get validation error") {
-                    val response  = RestClient.request(
+                    val response = RestClient.request(
                         ExpenseRoutes.UPDATE,
                         ExpenseUpdateRequestDto(
                             requestType = "expenseUpdate",
@@ -560,6 +657,52 @@ class ExpenseTest : BehaviorSpec({
                     response.errors?.shouldHaveSize(0)
                 }
             }
+            `when`("Delete other user expense") {
+                then("Delete expense") {
+                    // Create expense
+                    val createResponse = RestClient.request(
+                        ExpenseRoutes.CREATE,
+                        TEST_USER_1,
+                        ExpenseCreateRequestDto(
+                            requestType = "expenseCreate",
+                            requestId = "uniqueId",
+                            workMode = ExpenseRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            expense = ExpenseCreateObjectDto(
+                                createDt = "2023-01-01T14:46:04Z",
+                                amount = 100.00,
+                                card = "a8585ea8-e039-4799-b16c-06dc92f641f9",
+                                category = "d08e4713-657e-4351-b983-536c1bae51b5",
+                            )
+                        )
+                    )
+
+                    createResponse.shouldBeInstanceOf<ExpenseCreateResponseDto>()
+                    val newExpenseGuid = createResponse.expense?.guid
+                    val newExpenseLock = createResponse.expense?.lock
+
+                    val response = RestClient.request(
+                        ExpenseRoutes.DELETE,
+                        TEST_USER_2,
+                        ExpenseDeleteRequestDto(
+                            requestType = "expenseCreate",
+                            requestId = "uniqueId",
+                            workMode = ExpenseRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            guid = newExpenseGuid,
+                            lock = newExpenseLock
+                        )
+                    )
+
+                    response.shouldBeInstanceOf<ExpenseDeleteResponseDto>()
+                    response.result shouldBe ResponseResultDto.ERROR
+                    response.errors?.shouldHaveSize(1)
+                    response.errors?.get(0)?.code shouldBe "access_deny"
+                    response.errors?.get(0)?.group shouldBe "access"
+                }
+            }
             `when`("Do not fill guid or it is invalid") {
                 then("Get validation error") {
                     val invalidGuids = listOf(
@@ -632,6 +775,54 @@ class ExpenseTest : BehaviorSpec({
                     response.result shouldBe ResponseResultDto.SUCCESS
                     response.errors?.shouldHaveSize(0)
                     response.expenses?.shouldHaveAtLeastSize(1)
+                }
+            }
+            `when`("Two users create expenses") {
+                then("Get search results only with own expenses") {
+                    // Create 2 expenses for each user
+                    listOf(TEST_USER_1, TEST_USER_2).forEach {
+                        RestClient.request(
+                            ExpenseRoutes.CREATE,
+                            it,
+                            ExpenseCreateRequestDto(
+                                requestType = "expenseCreate",
+                                requestId = "uniqueId",
+                                workMode = ExpenseRequestWorkModeDto(
+                                    mode = workMode
+                                ),
+                                expense = ExpenseCreateObjectDto(
+                                    createDt = "2023-01-01T00:00:00Z",
+                                    amount = 100.50,
+                                    card = "a8585ea8-e039-4799-b16c-06dc92f641f9",
+                                    category = "d08e4713-657e-4351-b983-536c1bae51b5",
+                                )
+                            )
+                        )
+                    }
+
+                    // Read expenses. Each user should have 1 created expense.
+                    listOf(TEST_USER_1, TEST_USER_2).forEach {
+                        val response = RestClient.request(
+                            ExpenseRoutes.SEARCH,
+                            it,
+                            ExpenseSearchRequestDto(
+                                requestType = "expensesSearch",
+                                requestId = "uniqueId",
+                                workMode = ExpenseRequestWorkModeDto(
+                                    mode = workMode
+                                ),
+                                amountFrom = 100.0,
+                                amountTo = 101.0,
+                                dateFrom = "2023-01-01T00:00:00Z",
+                                dateTo = "2023-01-01T00:00:01Z"
+                            )
+                        )
+
+                        response.shouldBeInstanceOf<ExpenseSearchResponseDto>()
+                        response.result shouldBe ResponseResultDto.SUCCESS
+                        response.errors?.shouldHaveSize(0)
+                        response.expenses?.shouldHaveSize(1)
+                    }
                 }
             }
             `when`("Fill invalid search filter: amount_from = 0") {
@@ -810,6 +1001,92 @@ class ExpenseTest : BehaviorSpec({
 
                     response.summary?.get(1)?.amount shouldBe 100
                     response.summary?.get(1)?.category?.guid shouldBe "5410bdaf-834a-4ca6-9044-ee25d5a7164c"
+                }
+            }
+            `when`("Two users get statistic") {
+                then("Get statistic only for own expenses") {
+                    listOf(TEST_USER_1, TEST_USER_2).forEach {
+                        // Create expenses
+                        RestClient.request(
+                            ExpenseRoutes.CREATE,
+                            it,
+                            ExpenseCreateRequestDto(
+                                requestType = "expenseCreate",
+                                requestId = "uniqueId",
+                                workMode = ExpenseRequestWorkModeDto(
+                                    mode = workMode
+                                ),
+                                expense = ExpenseCreateObjectDto(
+                                    createDt = "2023-02-10T00:00:00Z",
+                                    amount = 10.50,
+                                    card = "a8585ea8-e039-4799-b16c-06dc92f641f9",
+                                    category = "1b3e4567-e99b-13d3-a476-446657420000",
+                                )
+                            )
+                        )
+
+                        RestClient.request(
+                            ExpenseRoutes.CREATE,
+                            it,
+                            ExpenseCreateRequestDto(
+                                requestType = "expenseCreate",
+                                requestId = "uniqueId",
+                                workMode = ExpenseRequestWorkModeDto(
+                                    mode = workMode
+                                ),
+                                expense = ExpenseCreateObjectDto(
+                                    createDt = "2023-02-10T00:00:00Z",
+                                    amount = 20.50,
+                                    card = "a8585ea8-e039-4799-b16c-06dc92f641f9",
+                                    category = "1b3e4567-e99b-13d3-a476-446657420000",
+                                )
+                            )
+                        )
+
+                        RestClient.request(
+                            ExpenseRoutes.CREATE,
+                            it,
+                            ExpenseCreateRequestDto(
+                                requestType = "expenseCreate",
+                                requestId = "uniqueId",
+                                workMode = ExpenseRequestWorkModeDto(
+                                    mode = workMode
+                                ),
+                                expense = ExpenseCreateObjectDto(
+                                    createDt = "2023-02-10T00:00:00Z",
+                                    amount = 100.00,
+                                    card = "a8585ea8-e039-4799-b16c-06dc92f641f9",
+                                    category = "5410bdaf-834a-4ca6-9044-ee25d5a7164c",
+                                )
+                            )
+                        )
+                    }
+                    listOf(TEST_USER_1, TEST_USER_2).forEach {
+                        val response = RestClient.request(
+                            ExpenseRoutes.STATS,
+                            it,
+                            ExpenseStatsRequestDto(
+                                requestType = "expensesSearch",
+                                requestId = "uniqueId",
+                                workMode = ExpenseRequestWorkModeDto(
+                                    mode = workMode
+                                ),
+                                dateFrom = "2023-02-10T00:00:00Z",
+                                dateTo = "2023-02-10T00:00:01Z"
+                            )
+                        )
+
+                        response.shouldBeInstanceOf<ExpenseStatsResponseDto>()
+                        response.result shouldBe ResponseResultDto.SUCCESS
+                        response.errors?.shouldHaveSize(0)
+                        response.total shouldBe 131
+                        response.summary?.shouldHaveSize(2)
+                        response.summary?.get(0)?.amount shouldBe 31
+                        response.summary?.get(0)?.category?.guid shouldBe "1b3e4567-e99b-13d3-a476-446657420000"
+
+                        response.summary?.get(1)?.amount shouldBe 100
+                        response.summary?.get(1)?.category?.guid shouldBe "5410bdaf-834a-4ca6-9044-ee25d5a7164c"
+                    }
                 }
             }
             `when`("Fill invalid statistic filter: date_to < date_from") {

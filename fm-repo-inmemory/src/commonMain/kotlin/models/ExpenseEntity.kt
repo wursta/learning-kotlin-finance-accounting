@@ -3,6 +3,7 @@ package local.learning.repo.inmemory.models
 import kotlinx.datetime.Instant
 import local.learning.common.INSTANT_NONE
 import local.learning.common.models.LockGuid
+import local.learning.common.models.PrincipalId
 import local.learning.common.models.card.CardGuid
 import local.learning.common.models.category.CategoryGuid
 import local.learning.common.models.expense.Expense
@@ -16,6 +17,7 @@ data class ExpenseEntity(
     var cardGuid: String? = null,
     var categoryGuid: String? = null,
     var lockGuid: String? = null,
+    var createdBy: String? = null
 ) {
     constructor(model: Expense) : this(
         guid = model.guid.asString().takeIf { it.isNotBlank() },
@@ -24,6 +26,7 @@ data class ExpenseEntity(
         cardGuid = model.cardGuid.asString().takeIf { it.isNotBlank() },
         categoryGuid = model.categoryGuid.asString().takeIf { it.isNotBlank() },
         lockGuid = model.lockGuid.asString().takeIf { it.isNotBlank() },
+        createdBy = model.createdBy.takeIf { it != PrincipalId.NONE }?.asString(),
     )
 
     fun toInternal() = Expense(
@@ -32,7 +35,8 @@ data class ExpenseEntity(
         amount = amount ?: BigDecimal.ZERO,
         cardGuid = cardGuid?.let { CardGuid(it) } ?: CardGuid.NONE,
         categoryGuid = categoryGuid?.let { CategoryGuid(it) } ?: CategoryGuid.NONE,
-        lockGuid = lockGuid?.let { LockGuid(it) } ?: LockGuid.NONE
+        lockGuid = lockGuid?.let { LockGuid(it) } ?: LockGuid.NONE,
+        createdBy = createdBy?.let { PrincipalId(it) } ?: PrincipalId.NONE
 
     )
 }

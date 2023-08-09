@@ -5,6 +5,7 @@ import local.learning.common.errors.ErrorCode
 import local.learning.common.errors.ErrorGroup
 import local.learning.common.exceptions.InvalidFieldFormat
 import local.learning.common.models.Error
+import local.learning.common.models.State
 
 fun CardContext.addError(vararg error: Error)  = errors.addAll(error)
 fun CardContext.fail(e: Throwable) = addError(e.asError())
@@ -17,3 +18,7 @@ fun CardContext.addFieldValidationError(field: String, description: String) = ad
         message = "Validation error for field $field. $description",
     )
 )
+fun CardContext.repoFail(dbErrors: List<Error>) {
+    state = State.FAILING
+    errors.addAll(dbErrors)
+}

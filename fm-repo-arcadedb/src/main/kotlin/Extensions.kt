@@ -1,7 +1,10 @@
+package local.learning.repo.arcadedb
+
 import com.arcadedb.query.sql.executor.Result
 import kotlinx.datetime.Instant
 import local.learning.common.INSTANT_NONE
 import local.learning.common.models.LockGuid
+import local.learning.common.models.PrincipalId
 import local.learning.common.models.bank.BankGuid
 import local.learning.common.models.card.Card
 import local.learning.common.models.card.CardGuid
@@ -16,7 +19,8 @@ fun Result.toCardInternal(): Card = Card(
     validFor = if (this.hasProperty("validFor")) this.getProperty("validFor") else "",
     owner  = if (this.hasProperty("owner")) this.getProperty("owner") else "",
     bankGuid = if (this.hasProperty("owner")) BankGuid(this.getProperty("bankGuid")) else BankGuid.NONE,
-    lockGuid = if (this.hasProperty("lockGuid")) LockGuid(this.getProperty("lockGuid")) else LockGuid.NONE
+    lockGuid = if (this.hasProperty("lockGuid")) LockGuid(this.getProperty("lockGuid")) else LockGuid.NONE,
+    createdBy = if (this.hasProperty("createdBy")) PrincipalId(this.getProperty("createdBy")) else PrincipalId.NONE,
 )
 
 fun Result.toExpenseInternal(): Expense = Expense(
@@ -25,5 +29,6 @@ fun Result.toExpenseInternal(): Expense = Expense(
     amount = if (this.hasProperty("amount")) BigDecimal(this.getProperty<Double>("amount")) else BigDecimal.ZERO,
     cardGuid = if (this.hasProperty("cardGuid")) CardGuid(this.getProperty("cardGuid")) else CardGuid.NONE,
     categoryGuid = if (this.hasProperty("categoryGuid")) CategoryGuid(this.getProperty("categoryGuid")) else CategoryGuid.NONE,
-    lockGuid = if (this.hasProperty("lockGuid")) LockGuid(this.getProperty("lockGuid")) else LockGuid.NONE
+    lockGuid = if (this.hasProperty("lockGuid")) LockGuid(this.getProperty("lockGuid")) else LockGuid.NONE,
+    createdBy = if (this.hasProperty("createdBy")) PrincipalId(this.getProperty("createdBy")) else PrincipalId.NONE
 )

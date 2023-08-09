@@ -5,6 +5,8 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import local.kotlin.learning.fm.acceptance.rest.TEST_USER_1
+import local.kotlin.learning.fm.acceptance.rest.TestUser
 import local.learning.api.models.IRequestDto
 import local.learning.api.models.IResponseDto
 import local.learning.api.serialization.utils.apiRequestSerialize
@@ -14,15 +16,18 @@ import mu.KotlinLogging
 private val log = KotlinLogging.logger {}
 object RestClient {
     private val client = HttpClient(OkHttp)
-    suspend fun request(path: String, request: IRequestDto): IResponseDto
+
+    internal suspend fun request(path: String, request: IRequestDto): IResponseDto = request(path, TEST_USER_1, request)
+    suspend fun request(path: String, user: TestUser, request: IRequestDto): IResponseDto
     {
         val url = "http://${AppCompose.C.hostApp}:${AppCompose.C.portApp}/$path"
         val json = apiRequestSerialize(request)
 
-        log.info { "Send request to $url. Body $json" }
+        log.info { "Send request to $url. Auth $user. Body $json." }
 
         val resp = client.post {
             url(url)
+            basicAuth(user.login, user.password)
             headers {
                 append(HttpHeaders.ContentType, ContentType.Application.Json)
             }

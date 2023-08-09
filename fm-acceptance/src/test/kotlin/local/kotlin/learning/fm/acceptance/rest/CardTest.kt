@@ -1,6 +1,5 @@
 package local.kotlin.learning.fm.acceptance.rest
 
-import ArcadeDbSchema
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.datatest.withData
@@ -14,6 +13,7 @@ import local.kotlin.learning.fm.acceptance.AppCompose
 import local.kotlin.learning.fm.acceptance.CardTestDataProvider
 import local.kotlin.learning.fm.acceptance.RestClient
 import local.learning.api.models.*
+import local.learning.repo.arcadedb.ArcadeDbSchema
 import mu.KotlinLogging
 
 object CardRoutes {
@@ -263,6 +263,52 @@ class CardTest : BehaviorSpec({
                     response.errors?.shouldHaveAtLeastSize(1)
                 }
             }
+            `when`("Get info about other user card") {
+                then("Get access deny error") {
+                    // Create card from test user 1
+                    val createResponse = RestClient.request(
+                        CardRoutes.CREATE,
+                        TEST_USER_1,
+                        CardCreateRequestDto(
+                            requestType = "cardCreate",
+                            requestId = "uniqueId",
+                            workMode = CardRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            card = CardCreateObjectDto(
+                                number = "5191891428863955",
+                                validFor = "2026-01",
+                                owner = "SAZONOV MIKHAIL",
+                                bank = "e69486d1-dae7-4ade-aa82-b4e98f65f0f2"
+                            )
+                        )
+                    )
+
+                    createResponse.shouldBeInstanceOf<CardCreateResponseDto>()
+
+                    val newCardGuid = createResponse.card?.guid
+
+                    // Read card from test user 2
+                    val response = RestClient.request(
+                        CardRoutes.READ,
+                        TEST_USER_2,
+                        CardReadRequestDto(
+                            requestType = "cardRead",
+                            requestId = "uniqueId",
+                            workMode = CardRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            guid = newCardGuid
+                        )
+                    )
+
+                    response.shouldBeInstanceOf<CardReadResponseDto>()
+                    response.result.shouldBe(ResponseResultDto.ERROR)
+                    response.errors?.shouldHaveSize(1)
+                    response.errors?.get(0)?.code shouldBe "access_deny"
+                    response.errors?.get(0)?.group shouldBe "access"
+                }
+            }
             `when`("Do not fill card guid or it is invalid") {
                 then("Get validation error") {
                     val invalidGuids = listOf(
@@ -382,6 +428,63 @@ class CardTest : BehaviorSpec({
                     response.shouldBeInstanceOf<CardUpdateResponseDto>()
                     response.result.shouldBe(ResponseResultDto.ERROR)
                     response.errors?.shouldHaveAtLeastSize(1)
+                }
+            }
+            `when`("Try to update other user card") {
+                then("Get access deny error") {
+                    // Create card
+                    val createResponse = RestClient.request(
+                        CardRoutes.CREATE,
+                        TEST_USER_1,
+                        CardCreateRequestDto(
+                            requestType = "cardCreate",
+                            requestId = "uniqueId",
+                            workMode = CardRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            card = CardCreateObjectDto(
+                                number = "5191891428863955",
+                                validFor = "2026-01",
+                                owner = "SAZONOV MIKHAIL",
+                                bank = "e69486d1-dae7-4ade-aa82-b4e98f65f0f2"
+                            )
+                        )
+                    )
+
+                    createResponse.shouldBeInstanceOf<CardCreateResponseDto>()
+
+                    val newCardGuid = createResponse.card?.guid
+                    val newCardLockGuid = createResponse.card?.lock
+
+                    // Update card
+                    val response = RestClient.request(
+                        CardRoutes.UPDATE,
+                        TEST_USER_2,
+                        CardUpdateRequestDto(
+                            requestType = "cardUpdate",
+                            requestId = "uniqueId",
+                            workMode = CardRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            card = CardObjectDto(
+                                guid = newCardGuid,
+                                number = "3333444455556666",
+                                validFor = "2023-01",
+                                owner = "IVANOV PETR",
+                                bank = BankObjectDto(
+                                    guid = "428488f0-b878-4080-a2fa-6fbdb5d7790a"
+                                ),
+                                lock = newCardLockGuid
+                            )
+                        )
+                    )
+
+                    response.shouldBeInstanceOf<CardUpdateResponseDto>()
+                    response.result.shouldBe(ResponseResultDto.ERROR)
+                    response.errors?.shouldHaveAtLeastSize(1)
+                    response.errors?.get(0)?.code shouldBe "access_deny"
+                    response.errors?.get(0)?.group shouldBe "access"
+
                 }
             }
             `when`("Do not fill card guid or it is invalid") {
@@ -587,6 +690,53 @@ class CardTest : BehaviorSpec({
                     response.shouldBeInstanceOf<CardDeleteResponseDto>()
                     response.result.shouldBe(ResponseResultDto.SUCCESS)
                     response.errors?.shouldHaveSize(0)
+                }
+            }
+            `when`("Try to delete other user card") {
+                then("Get access deny error") {
+                    // Create card
+                    val createResponse = RestClient.request(
+                        CardRoutes.CREATE,
+                        TEST_USER_1,
+                        CardCreateRequestDto(
+                            requestType = "cardCreate",
+                            requestId = "uniqueId",
+                            workMode = CardRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            card = CardCreateObjectDto(
+                                number = "5191891428863955",
+                                validFor = "2026-01",
+                                owner = "SAZONOV MIKHAIL",
+                                bank = "e69486d1-dae7-4ade-aa82-b4e98f65f0f2"
+                            )
+                        )
+                    )
+
+                    createResponse.shouldBeInstanceOf<CardCreateResponseDto>()
+
+                    val newCardGuid = createResponse.card?.guid
+                    val newCardLockGuid = createResponse.card?.lock
+
+                    val response = RestClient.request(
+                        CardRoutes.DELETE,
+                        TEST_USER_2,
+                        CardDeleteRequestDto(
+                            requestType = "cardCreate",
+                            requestId = "uniqueId",
+                            workMode = CardRequestWorkModeDto(
+                                mode = workMode
+                            ),
+                            guid = newCardGuid,
+                            lock = newCardLockGuid
+                        )
+                    )
+
+                    response.shouldBeInstanceOf<CardDeleteResponseDto>()
+                    response.result.shouldBe(ResponseResultDto.ERROR)
+                    response.errors?.shouldHaveAtLeastSize(1)
+                    response.errors?.get(0)?.code shouldBe "access_deny"
+                    response.errors?.get(0)?.group shouldBe "access"
                 }
             }
             `when`("Try to delete card with invalid lock") {

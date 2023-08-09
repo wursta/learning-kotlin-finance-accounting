@@ -2,9 +2,8 @@ package local.learning.common.helpers
 
 import local.learning.common.INSTANT_NEGATIVE_INFINITY
 import local.learning.common.INSTANT_POSITIVE_INFINITY
-import local.learning.common.models.expense.Expense
-import local.learning.common.models.expense.ExpenseSearchFilter
-import local.learning.common.models.expense.ExpenseStatisticFilter
+import local.learning.common.models.Principal
+import local.learning.common.models.expense.*
 import java.math.BigDecimal
 
 fun Expense.isGuidValid(): Boolean = guid.isValid()
@@ -51,3 +50,8 @@ fun ExpenseStatisticFilter.isDatesValid(): Boolean {
 
     return true
 }
+fun Expense.resolveRelationsTo(principal: Principal): Set<ExpenseRelation> = setOfNotNull(
+    ExpenseRelation.NONE,
+    ExpenseRelation.NEW.takeIf { guid == ExpenseGuid.NONE },
+    ExpenseRelation.OWN.takeIf { principal.id == createdBy }
+)

@@ -14,6 +14,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class CardStubTest {
+    private val testUserLogin = "msazonov"
+    private val testUserPassword = "qwerty"
     private val cardStub: Card = CardStub.get()
     @Test
     fun create() = testApplication {
@@ -33,6 +35,7 @@ class CardStubTest {
                 )
             )
             contentType(ContentType.Application.Json)
+            basicAuth(testUserLogin, testUserPassword)
             val requestJson = jsonSerializer.encodeToString(requestObj)
             setBody(requestJson)
         }
@@ -62,6 +65,7 @@ class CardStubTest {
                 guid = cardStub.guid.asString()
             )
             contentType(ContentType.Application.Json)
+            basicAuth(testUserLogin, testUserPassword)
             val requestJson = jsonSerializer.encodeToString(requestObj)
             setBody(requestJson)
         }
@@ -99,6 +103,7 @@ class CardStubTest {
                 )
             )
             contentType(ContentType.Application.Json)
+            basicAuth(testUserLogin, testUserPassword)
             val requestJson = jsonSerializer.encodeToString(requestObj)
             setBody(requestJson)
         }
@@ -128,6 +133,7 @@ class CardStubTest {
                 guid = cardStub.guid.asString()
             )
             contentType(ContentType.Application.Json)
+            basicAuth(testUserLogin, testUserPassword)
             val requestJson = jsonSerializer.encodeToString(requestObj)
             setBody(requestJson)
         }
