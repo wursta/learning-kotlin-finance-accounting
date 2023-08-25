@@ -63,6 +63,7 @@ fun Application.mainModule(
         install(CORS) {
             allowHost(swaggerHost)
             allowHeader(HttpHeaders.ContentType)
+            allowHeader(HttpHeaders.Authorization)
         }
     }
 
