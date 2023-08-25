@@ -127,7 +127,7 @@ fun CorChainDsl<ExpenseContext>.repoStatistic() = worker {
         val request = DbExpenseStatisticRequest(
             createdBy = principal.id,
             dateFrom = expenseStatisticValidating.dateFrom.takeIf { it != INSTANT_NEGATIVE_INFINITY },
-            dateTo = expenseStatisticValidating.dateFrom.takeIf { it != INSTANT_POSITIVE_INFINITY }
+            dateTo = expenseStatisticValidating.dateTo.takeIf { it != INSTANT_POSITIVE_INFINITY }
         )
         val result = repo.stats(request)
         if (result.success) {
